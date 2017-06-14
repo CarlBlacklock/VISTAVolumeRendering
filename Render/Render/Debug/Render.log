@@ -1,0 +1,5 @@
+﻿  Camera.cpp
+d:\volumerender\render\source\camera.cpp(5): warning C4305: '=': truncation from 'double' to 'float'
+d:\volumerender\render\source\camera.cpp(40): warning C4305: '=': truncation from 'double' to 'float'
+  Render.vcxproj -> D:\VolumeRender\Render\Debug\Render.exe
+  Render.vcxproj -> D:\VolumeRender\Render\Debug\Render.pdb (Partial PDB)
