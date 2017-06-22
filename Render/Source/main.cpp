@@ -15,6 +15,7 @@ glm::vec3 viewingDir;
 float theta = 0.0f;
 bool animate = false;
 double animateStart;
+glm::vec2 mousePosition = glm::vec2((float)0.0f, (float)0.0f);
 GLuint crossSectionExtents;
 float *extents;
 int xResolution = 256;
@@ -222,16 +223,27 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 			myCube->ResetModelMatrix();
 			break;
 
-		case GLFW_KEY_UP:
+		case GLFW_KEY_C:
+			double tempX, tempY;
+			glfwGetCursorPos(window, &tempX, &tempY);
+			if (tempX != NULL && tempY != NULL) {
+				//glfwGetCursorPos sets coordinates to NULL when they are undefined
+				//Update stored mouse position
+				mousePosition = glm::vec2((float)tempX, (float)tempY);
+				std::cout << "Mouse Position set to: " << tempX << ", " << tempY << std::endl;
+			}
+			break;
+
+		case GLFW_KEY_LEFT:
 			myCamera->moveCamera(0.0f, 0.01f * M_PI);
 			break;
-		case GLFW_KEY_DOWN:
+		case GLFW_KEY_RIGHT:
 			myCamera->moveCamera(0.0f, -0.01f * M_PI);
 			break;
-		case GLFW_KEY_RIGHT:
+		case GLFW_KEY_DOWN:
 			myCamera->moveCamera(0.01f * M_PI, 0.0f);
 			break;
-		case GLFW_KEY_LEFT:
+		case GLFW_KEY_UP:
 			myCamera->moveCamera(-0.01f * M_PI, 0.0f);
 			break;
 
@@ -407,10 +419,10 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		if (renderMode == 1) {
-			myCube->DrawDataCubeOrthoView(MovingOrthoRayCastingProgram, volumeID, gradientID, OrthoMatrix, myCamera->ViewMatrix, myCamera->ViewDir, Resolution, myLight, extents);
+			myCube->DrawDataCubeOrthoView(MovingOrthoRayCastingProgram, volumeID, gradientID, OrthoMatrix, myCamera->ViewMatrix, myCamera->ViewDir, Resolution, mousePosition, myLight, extents);
 		}
 		if (renderMode == 0) {
-			myCube->DrawDataCubeOrthoView(MovingOrthoMIPProgram, volumeID, gradientID, OrthoMatrix, myCamera->ViewMatrix, myCamera->ViewDir, Resolution, myLight, extents);
+			myCube->DrawDataCubeOrthoView(MovingOrthoMIPProgram, volumeID, gradientID, OrthoMatrix, myCamera->ViewMatrix, myCamera->ViewDir, Resolution, mousePosition, myLight, extents);
 		}
 		//myCube.DrawDataCubeOrthoView(MovingPerspectiveRayCastingProgram, volumeID, gradientID, OrthoMatrix, ViewMatrix, viewingDir, Resolution, myLight);
 		//myCube.DrawDataCube(OrthoMIPProgram, volumeID);

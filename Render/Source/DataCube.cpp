@@ -170,8 +170,9 @@ void DataCube::DrawDataCube(GLuint program, GLuint volumeData) {
 
 }
 
-void DataCube::DrawDataCubeOrthoView(GLuint program, GLuint volumeData, GLuint gradientID, glm::mat4 OrthoMatrix, glm::mat4 ViewMatrix, glm::vec3 ViewingDir, glm::vec3 Resolution, Light aLight, float *extents){
+void DataCube::DrawDataCubeOrthoView(GLuint program, GLuint volumeData, GLuint gradientID, glm::mat4 OrthoMatrix, glm::mat4 ViewMatrix, glm::vec3 ViewingDir, glm::vec3 Resolution, glm::vec2 mousePosition, Light aLight, float *extents){
 	GLint textureLocation, orthoLocation, viewLocation, viewingDirLocation, resolutionLocation, gradientLocation, lightLocation, modelLocation, extentLocation;
+	GLint mousePosLocation;
 	glUseProgram(program);
 	glBindVertexArray(VAO);
 
@@ -211,10 +212,8 @@ void DataCube::DrawDataCubeOrthoView(GLuint program, GLuint volumeData, GLuint g
 	extentLocation = glGetUniformLocation(program, "zMaxExtent");
 	glUniform1f(extentLocation, extents[5]);
 
-
-
-
-
+	mousePosLocation = glGetUniformLocation(program, "mousePosition");
+	glUniform2fv(mousePosLocation, 1, glm::value_ptr(mousePosition));
 
 	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(ViewMatrix));
 	glUniformMatrix4fv(orthoLocation, 1, GL_FALSE, glm::value_ptr(OrthoMatrix));
