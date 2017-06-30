@@ -1,0 +1,44 @@
+#version 430
+
+uniform sampler3D TextureSampler;
+layout(rgba16f, binding = 1) uniform image3D outputTexture;
+uniform vec3 Resolution;
+uniform float threshold;
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+
+void main(void){
+
+	ivec3 readLocation = ivec3(gl_GlobalInvocationID.x, gl_GlobalInvocationID.y, gl_GlobalInvocationID.z);
+	//Read vertex data and store in corrisponding variables
+	//Vertex convention below
+	//			v7 --------- v6
+	//		   /|            /|
+	//		  / |           / |
+	//		 v3 --------- v2  |
+	//       |  |          |  |
+	//		 |  v4---------|-v5
+	//       | /           | /
+	//		 |/            |/
+	//		v0------------v1
+	float v0 = texture(TextureSampler, readLocation).r;
+	float v1 = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(1, 0, 0)).r;
+	float v2 = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(1, 1, 0)).r;
+	float v3 = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(0, 1, 0)).r;
+	float v4 = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(0, 0, 1)).r;
+	float v5 = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(1, 0, 1)).r;
+	float v6 = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(1, 1, 1)).r;
+	float v7 = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(0, 1, 1)).r;
+	float vertices[8] = float[](v0, v1, v2, v3, v4, v5, v6, v7);
+
+	//Determine which of the 14 abstract possiblities that are present in the voxel
+	//Start by assuming that there are no triangles in the voxel
+	int possiblityIndex = 0;
+	for (int i = 0; i < 8; i++){
+		if(vertices[i] > threshold){
+			possibilityIndex = possibilityIndex && (1 << i);
+		}
+	}
+
+
+
+}
