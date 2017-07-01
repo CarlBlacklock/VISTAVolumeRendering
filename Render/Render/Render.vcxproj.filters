@@ -39,6 +39,9 @@
     <ClCompile Include="..\Source\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\marchingCubes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Headers\OpenGLincludes.h">
@@ -62,6 +65,9 @@
     <ClInclude Include="..\Headers\Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\Headers\marchingCubes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Shaders\OrthoRayCastingFragment.fs" />
@@ -75,5 +81,6 @@
     <None Include="..\Shaders\basicCompute.comp" />
     <None Include="..\Shaders\MovingPerspectiveRayCastingVertex.vs" />
     <None Include="..\Shaders\MovingPerspectiveRayCastingFragment.fs" />
+    <None Include="..\Shaders\marchingCubes.comp" />
   </ItemGroup>
 </Project>

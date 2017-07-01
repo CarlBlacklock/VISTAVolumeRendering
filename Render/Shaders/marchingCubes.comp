@@ -6,6 +6,12 @@ uniform vec3 Resolution;
 uniform float threshold;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
+oneTriangle(float vertices[8], int possibilityIndex[8]){
+	if(possibilityIndex[0] == 1){
+		
+	}
+}
+
 void main(void){
 
 	ivec3 readLocation = ivec3(gl_GlobalInvocationID.x, gl_GlobalInvocationID.y, gl_GlobalInvocationID.z);
@@ -32,13 +38,17 @@ void main(void){
 
 	//Determine which of the 14 abstract possiblities that are present in the voxel
 	//Start by assuming that there are no triangles in the voxel
-	int possiblityIndex = 0;
+	int numberOfVerticesLarger = 0;
+	int possibilityIndex[8] = int[](0, 0, 0, 0, 0, 0, 0, 0);
 	for (int i = 0; i < 8; i++){
 		if(vertices[i] > threshold){
-			possibilityIndex = possibilityIndex && (1 << i);
+			numberOfVerticesLarger++;
+			possibilityIndex[i] = 1;
 		}
 	}
-
+	if(numberOfVerticesLarger == 1){
+		oneTriangle(vertices, possibilityIndex);
+	}
 
 
 }

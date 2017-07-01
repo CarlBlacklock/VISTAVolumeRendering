@@ -336,6 +336,9 @@ int main() {
 		std::cin >> i;
 		return EXIT_FAILURE;
 	}
+	int testInt = 0;
+	testInt = testInt | (1 << 7);
+	std::cout << testInt << std::endl;
 	GLuint volumeID;
 	glGenTextures(1, &volumeID);
 	glActiveTexture(GL_TEXTURE0);
