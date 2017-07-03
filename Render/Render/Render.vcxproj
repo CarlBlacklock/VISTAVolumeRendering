@@ -143,6 +143,7 @@
   <ItemGroup>
     <None Include="..\Shaders\basicCompute.comp" />
     <None Include="..\Shaders\marchingCubes.comp" />
+    <None Include="..\Shaders\marchingCubesVoxelClassification.comp" />
     <None Include="..\Shaders\MovingOrthoMIPFragment.fs" />
     <None Include="..\Shaders\MovingOrthoMIPVertex.vs" />
     <None Include="..\Shaders\MovingOrthoRayCastingFragment.fs" />
@@ -153,6 +154,9 @@
     <None Include="..\Shaders\OrthoMIPVertex.vs" />
     <None Include="..\Shaders\OrthoRayCastingFragment.fs" />
     <None Include="..\Shaders\OrthoRayCastingVertex.vs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\Resources\triTable.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

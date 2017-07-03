@@ -1,0 +1,147 @@
+#version 430
+
+struct Voxel{
+	vec3 vertices[8];
+	float values[8];
+};
+
+struct Vertex{
+	vec3 position;
+	vec4 colour;
+};
+
+struct Triangle{
+	Vertex vertices[3];
+};
+
+uniform sampler3D TextureSampler;
+layout(r32i, binding = 2) uniform image3D offsetOutput;
+uniform sampler2D triTable;
+uniform vec3 Resolution;
+uniform float threshold;
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+
+
+//Look up tables and algorithm taken from "Polygonising a scalar field" by Paul Bourke
+//Original at: http://paulbourke.net/geometry/polygonise/
+const int edgeTable[256]={
+0x0  , 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c,
+0x80c, 0x905, 0xa0f, 0xb06, 0xc0a, 0xd03, 0xe09, 0xf00,
+0x190, 0x99 , 0x393, 0x29a, 0x596, 0x49f, 0x795, 0x69c,
+0x99c, 0x895, 0xb9f, 0xa96, 0xd9a, 0xc93, 0xf99, 0xe90,
+0x230, 0x339, 0x33 , 0x13a, 0x636, 0x73f, 0x435, 0x53c,
+0xa3c, 0xb35, 0x83f, 0x936, 0xe3a, 0xf33, 0xc39, 0xd30,
+0x3a0, 0x2a9, 0x1a3, 0xaa , 0x7a6, 0x6af, 0x5a5, 0x4ac,
+0xbac, 0xaa5, 0x9af, 0x8a6, 0xfaa, 0xea3, 0xda9, 0xca0,
+0x460, 0x569, 0x663, 0x76a, 0x66 , 0x16f, 0x265, 0x36c,
+0xc6c, 0xd65, 0xe6f, 0xf66, 0x86a, 0x963, 0xa69, 0xb60,
+0x5f0, 0x4f9, 0x7f3, 0x6fa, 0x1f6, 0xff , 0x3f5, 0x2fc,
+0xdfc, 0xcf5, 0xfff, 0xef6, 0x9fa, 0x8f3, 0xbf9, 0xaf0,
+0x650, 0x759, 0x453, 0x55a, 0x256, 0x35f, 0x55 , 0x15c,
+0xe5c, 0xf55, 0xc5f, 0xd56, 0xa5a, 0xb53, 0x859, 0x950,
+0x7c0, 0x6c9, 0x5c3, 0x4ca, 0x3c6, 0x2cf, 0x1c5, 0xcc ,
+0xfcc, 0xec5, 0xdcf, 0xcc6, 0xbca, 0xac3, 0x9c9, 0x8c0,
+0x8c0, 0x9c9, 0xac3, 0xbca, 0xcc6, 0xdcf, 0xec5, 0xfcc,
+0xcc , 0x1c5, 0x2cf, 0x3c6, 0x4ca, 0x5c3, 0x6c9, 0x7c0,
+0x950, 0x859, 0xb53, 0xa5a, 0xd56, 0xc5f, 0xf55, 0xe5c,
+0x15c, 0x55 , 0x35f, 0x256, 0x55a, 0x453, 0x759, 0x650,
+0xaf0, 0xbf9, 0x8f3, 0x9fa, 0xef6, 0xfff, 0xcf5, 0xdfc,
+0x2fc, 0x3f5, 0xff , 0x1f6, 0x6fa, 0x7f3, 0x4f9, 0x5f0,
+0xb60, 0xa69, 0x963, 0x86a, 0xf66, 0xe6f, 0xd65, 0xc6c,
+0x36c, 0x265, 0x16f, 0x66 , 0x76a, 0x663, 0x569, 0x460,
+0xca0, 0xda9, 0xea3, 0xfaa, 0x8a6, 0x9af, 0xaa5, 0xbac,
+0x4ac, 0x5a5, 0x6af, 0x7a6, 0xaa , 0x1a3, 0x2a9, 0x3a0,
+0xd30, 0xc39, 0xf33, 0xe3a, 0x936, 0x83f, 0xb35, 0xa3c,
+0x53c, 0x435, 0x73f, 0x636, 0x13a, 0x33 , 0x339, 0x230,
+0xe90, 0xf99, 0xc93, 0xd9a, 0xa96, 0xb9f, 0x895, 0x99c,
+0x69c, 0x795, 0x49f, 0x596, 0x29a, 0x393, 0x99 , 0x190,
+0xf00, 0xe09, 0xd03, 0xc0a, 0xb06, 0xa0f, 0x905, 0x80c,
+0x70c, 0x605, 0x50f, 0x406, 0x30a, 0x203, 0x109, 0x0   };
+
+
+
+Vertex vertexInterpolation(float threshold, vec3 p1, vec3 p2, float p1Val, float p2Val){
+	float mu;
+	vec3 p;
+	Vertex trianglePoint;
+	if(abs(threshold - p1Val) < 0.00001){
+		trianglePoint.position = p1;
+		trianglePoint.colour = vec4(p1Val);
+		return trianglePoint;
+	}
+	if(abs(threshold - p2Val) < 0.00001){
+		trianglePoint.position = p2;
+		trianglePoint.colour = vec4(p2Val);
+		return trianglePoint;
+	}
+	if(abs(p1Val - p2Val) < 0.00001){
+		trianglePoint.position = p1;
+		trianglePoint.colour = vec4(p1Val);
+		return trianglePoint;
+	}
+	mu = (threshold - p1Val) / (p2Val - p1Val);
+	p.x = p1.x + mu * (p2.x - p1.x);
+	p.y = p1.y + mu * (p2.y - p1.y);
+	p.z = p1.z + mu * (p2.z - p1.z);
+	trianglePoint.position = p;
+	trianglePoint.colour = vec4(p1Val + mu * (p2Val - p1Val));
+	
+	return trianglePoint;
+}
+vec3 emptySpace = vec3(0.0);
+vec4 noColor = vec4(0.0);
+
+void main(void){
+	Vertex vertexList[12] = {{emptySpace, noColor}, {emptySpace, noColor}, {emptySpace, noColor}, {emptySpace, noColor}, {emptySpace, noColor}, {emptySpace, noColor}, {emptySpace, noColor}, {emptySpace, noColor}, {emptySpace, noColor}, {emptySpace, noColor}, {emptySpace, noColor}, {emptySpace, noColor}};
+	ivec3 readLocation = ivec3(gl_GlobalInvocationID.x, gl_GlobalInvocationID.y, gl_GlobalInvocationID.z);
+	Voxel myVoxel;
+	//Read vertex data and store in corrisponding variables
+	//Vertex convention below
+	//			v4 --------- v5
+	//		   /|            /|
+	//		  / |           / |
+	//		 v7 --------- v6  |
+	//       |  |          |  |
+	//		 |  v0---------|-v1
+	//       | /           | /
+	//		 |/            |/
+	//		v3------------v2
+	myVoxel.vertices[0] = vec3(float(gl_GlobalInvocationID.x / Resolution.x), float(gl_GlobalInvocationID.y / Resolution.y), float((gl_GlobalInvocationID.z + 1) / Resolution.z)); 
+	myVoxel.values[0] = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(0, 0, 1)).r;
+	myVoxel.vertices[1] = vec3(float((gl_GlobalInvocationID.x + 1) / Resolution.x), float(gl_GlobalInvocationID.y / Resolution.y), float((gl_GlobalInvocationID.z + 1) / Resolution.z));
+	myVoxel.values[1] = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(1, 0, 1)).r;
+	myVoxel.vertices[2] = vec3(float((gl_GlobalInvocationID.x + 1) / Resolution.x), float(gl_GlobalInvocationID.y / Resolution.y), float(gl_GlobalInvocationID.z / Resolution.z));
+	myVoxel.values[2] = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(1, 0, 0)).r;
+	myVoxel.vertices[3] = vec3(float(gl_GlobalInvocationID.x / Resolution.x), float(gl_GlobalInvocationID.y / Resolution.y), float(gl_GlobalInvocationID.z / Resolution.z));
+	myVoxel.values[3] = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(0, 0, 0)).r;
+	myVoxel.vertices[4] = vec3(float(gl_GlobalInvocationID.x / Resolution.x), float((gl_GlobalInvocationID.y + 1)/ Resolution.y), float((gl_GlobalInvocationID.z + 1) / Resolution.z));
+	myVoxel.values[4] = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(0, 1, 1)).r;
+	myVoxel.vertices[5] = vec3(float((gl_GlobalInvocationID.x + 1) / Resolution.x), float((gl_GlobalInvocationID.y + 1) / Resolution.y), float((gl_GlobalInvocationID.z + 1) / Resolution.z));
+	myVoxel.values[5] = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(1, 1, 1)).r;
+	myVoxel.vertices[6] = vec3(float((gl_GlobalInvocationID.x + 1) / Resolution.x), float((gl_GlobalInvocationID.y + 1) / Resolution.y), float(gl_GlobalInvocationID.z / Resolution.z));
+	myVoxel.values[6] = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(1, 1, 0)).r;
+	myVoxel.vertices[7] = vec3(float(gl_GlobalInvocationID.x / Resolution.x), float((gl_GlobalInvocationID.y + 1) / Resolution.y), float(gl_GlobalInvocationID.z / Resolution.z));
+	myVoxel.values[7] = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(0, 1, 0)).r;
+	
+
+	//Determine which of the 14 abstract possiblities that are present in the voxel
+	//Start by assuming that there are no triangles in the voxel
+	int possibilityIndex = 0;
+	if (myVoxel.values[0] < threshold) possibilityIndex |= 1;
+	if (myVoxel.values[1] < threshold) possibilityIndex |= 2;
+	if (myVoxel.values[2] < threshold) possibilityIndex |= 4;
+	if (myVoxel.values[3] < threshold) possibilityIndex |= 8;
+	if (myVoxel.values[4] < threshold) possibilityIndex |= 16;
+	if (myVoxel.values[5] < threshold) possibilityIndex |= 32;
+	if (myVoxel.values[6] < threshold) possibilityIndex |= 64;
+	if (myVoxel.values[7] < threshold) possibilityIndex |= 128;
+
+	
+	//Count the number of triangles to be generated
+	int numberOfTrianglesGenerated = 0;
+	for(int i = 0; int(texelFetch(triTable, ivec2(possibilityIndex,i), 0).r) != -1; i+=3){
+		numberOfTrianglesGenerated++;
+	}
+	imageStore(offsetOutput, gl_GlobalInvocationID, ivec4(numberOfTrianglesGenerated, 0, 0, 0));
+
+}

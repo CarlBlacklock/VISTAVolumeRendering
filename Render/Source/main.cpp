@@ -319,6 +319,7 @@ int main() {
 	GLuint MovingPerspectiveRayCastingProgram = CompileShaders("../Shaders/MovingPerspectiveRayCastingVertex.vs", "../Shaders/MovingPerspectiveRayCastingFragment.fs");
 	GLuint MovingOrthoMIPProgram = CompileShaders("../Shaders/MovingOrthoMIPVertex.vs", "../Shaders/MovingOrthoMIPFragment.fs");
 	GLuint ComputeShaderProgram = CompileComputeShader("../Shaders/basicCompute.comp");
+	GLuint MarchingCubesProgram = CompileComputeShader("../Shaders/marchingCubes.comp");
 
 	myCube = new DataCube();
 	myCamera = new Camera();

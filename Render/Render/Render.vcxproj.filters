@@ -82,5 +82,9 @@
     <None Include="..\Shaders\MovingPerspectiveRayCastingVertex.vs" />
     <None Include="..\Shaders\MovingPerspectiveRayCastingFragment.fs" />
     <None Include="..\Shaders\marchingCubes.comp" />
+    <None Include="..\Shaders\marchingCubesVoxelClassification.comp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\Resources\triTable.txt" />
   </ItemGroup>
 </Project>

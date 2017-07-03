@@ -1,13 +1,3 @@
-d:\volumerender\render\render\debug\vc140.pdb
-d:\volumerender\render\render\debug\vc140.idb
-d:\volumerender\render\render\debug\compileshaders.obj
-d:\volumerender\render\render\debug\createwindow.obj
-d:\volumerender\render\render\debug\datacube.obj
-d:\volumerender\render\render\debug\loaddicom.obj
-d:\volumerender\render\render\debug\main.obj
-d:\volumerender\render\render\debug\rawloader.obj
-d:\volumerender\render\render\debug\screenfillingquad.obj
-d:\volumerender\render\render\debug\camera.obj
 d:\github\vistavolumerendering\render\render\debug\vc140.pdb
 d:\github\vistavolumerendering\render\render\debug\vc140.idb
 d:\github\vistavolumerendering\render\render\debug\camera.obj
@@ -19,9 +9,6 @@ d:\github\vistavolumerendering\render\render\debug\main.obj
 d:\github\vistavolumerendering\render\render\debug\marchingcubes.obj
 d:\github\vistavolumerendering\render\render\debug\rawloader.obj
 d:\github\vistavolumerendering\render\render\debug\screenfillingquad.obj
-d:\volumerender\render\debug\render.ilk
-d:\volumerender\render\debug\render.exe
-d:\volumerender\render\debug\render.pdb
 d:\github\vistavolumerendering\render\debug\render.ilk
 d:\github\vistavolumerendering\render\debug\render.exe
 d:\github\vistavolumerendering\render\debug\render.pdb
