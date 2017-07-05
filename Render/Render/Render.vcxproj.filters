@@ -83,6 +83,7 @@
     <None Include="..\Shaders\MovingPerspectiveRayCastingFragment.fs" />
     <None Include="..\Shaders\marchingCubes.comp" />
     <None Include="..\Shaders\marchingCubesVoxelClassification.comp" />
+    <None Include="..\Shaders\marchingCubesOffsetCalculations.comp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\Resources\triTable.txt" />

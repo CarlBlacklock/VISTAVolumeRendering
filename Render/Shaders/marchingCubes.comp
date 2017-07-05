@@ -16,6 +16,7 @@ struct Triangle{
 
 uniform sampler3D TextureSampler;
 uniform sampler3D outputOffset;
+uniform sampler3D numberOfTrianglesMap;
 uniform sampler2D triTable;
 layout(std430, binding = 2) buffer outBuffer
 {
@@ -111,84 +112,87 @@ void main(void){
 	//       | /           | /
 	//		 |/            |/
 	//		v3------------v2
-	myVoxel.vertices[0] = vec3(float(gl_GlobalInvocationID.x / Resolution.x), float(gl_GlobalInvocationID.y / Resolution.y), float((gl_GlobalInvocationID.z + 1) / Resolution.z)); 
-	myVoxel.values[0] = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(0, 0, 1)).r;
-	myVoxel.vertices[1] = vec3(float((gl_GlobalInvocationID.x + 1) / Resolution.x), float(gl_GlobalInvocationID.y / Resolution.y), float((gl_GlobalInvocationID.z + 1) / Resolution.z));
-	myVoxel.values[1] = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(1, 0, 1)).r;
-	myVoxel.vertices[2] = vec3(float((gl_GlobalInvocationID.x + 1) / Resolution.x), float(gl_GlobalInvocationID.y / Resolution.y), float(gl_GlobalInvocationID.z / Resolution.z));
-	myVoxel.values[2] = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(1, 0, 0)).r;
-	myVoxel.vertices[3] = vec3(float(gl_GlobalInvocationID.x / Resolution.x), float(gl_GlobalInvocationID.y / Resolution.y), float(gl_GlobalInvocationID.z / Resolution.z));
-	myVoxel.values[3] = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(0, 0, 0)).r;
-	myVoxel.vertices[4] = vec3(float(gl_GlobalInvocationID.x / Resolution.x), float((gl_GlobalInvocationID.y + 1)/ Resolution.y), float((gl_GlobalInvocationID.z + 1) / Resolution.z));
-	myVoxel.values[4] = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(0, 1, 1)).r;
-	myVoxel.vertices[5] = vec3(float((gl_GlobalInvocationID.x + 1) / Resolution.x), float((gl_GlobalInvocationID.y + 1) / Resolution.y), float((gl_GlobalInvocationID.z + 1) / Resolution.z));
-	myVoxel.values[5] = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(1, 1, 1)).r;
-	myVoxel.vertices[6] = vec3(float((gl_GlobalInvocationID.x + 1) / Resolution.x), float((gl_GlobalInvocationID.y + 1) / Resolution.y), float(gl_GlobalInvocationID.z / Resolution.z));
-	myVoxel.values[6] = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(1, 1, 0)).r;
-	myVoxel.vertices[7] = vec3(float(gl_GlobalInvocationID.x / Resolution.x), float((gl_GlobalInvocationID.y + 1) / Resolution.y), float(gl_GlobalInvocationID.z / Resolution.z));
-	myVoxel.values[7] = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(0, 1, 0)).r;
+	//Thanks to previous classification run we can immediately terminate threads that will not generate triangles
+	if(int(texelFetch(numberOfTrianglesMap, readLocation, 0).r) != 0){
+		myVoxel.vertices[0] = vec3(float(gl_GlobalInvocationID.x / Resolution.x), float(gl_GlobalInvocationID.y / Resolution.y), float((gl_GlobalInvocationID.z + 1) / Resolution.z)); 
+		myVoxel.values[0] = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(0, 0, 1)).r;
+		myVoxel.vertices[1] = vec3(float((gl_GlobalInvocationID.x + 1) / Resolution.x), float(gl_GlobalInvocationID.y / Resolution.y), float((gl_GlobalInvocationID.z + 1) / Resolution.z));
+		myVoxel.values[1] = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(1, 0, 1)).r;
+		myVoxel.vertices[2] = vec3(float((gl_GlobalInvocationID.x + 1) / Resolution.x), float(gl_GlobalInvocationID.y / Resolution.y), float(gl_GlobalInvocationID.z / Resolution.z));
+		myVoxel.values[2] = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(1, 0, 0)).r;
+		myVoxel.vertices[3] = vec3(float(gl_GlobalInvocationID.x / Resolution.x), float(gl_GlobalInvocationID.y / Resolution.y), float(gl_GlobalInvocationID.z / Resolution.z));
+		myVoxel.values[3] = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(0, 0, 0)).r;
+		myVoxel.vertices[4] = vec3(float(gl_GlobalInvocationID.x / Resolution.x), float((gl_GlobalInvocationID.y + 1)/ Resolution.y), float((gl_GlobalInvocationID.z + 1) / Resolution.z));
+		myVoxel.values[4] = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(0, 1, 1)).r;
+		myVoxel.vertices[5] = vec3(float((gl_GlobalInvocationID.x + 1) / Resolution.x), float((gl_GlobalInvocationID.y + 1) / Resolution.y), float((gl_GlobalInvocationID.z + 1) / Resolution.z));
+		myVoxel.values[5] = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(1, 1, 1)).r;
+		myVoxel.vertices[6] = vec3(float((gl_GlobalInvocationID.x + 1) / Resolution.x), float((gl_GlobalInvocationID.y + 1) / Resolution.y), float(gl_GlobalInvocationID.z / Resolution.z));
+		myVoxel.values[6] = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(1, 1, 0)).r;
+		myVoxel.vertices[7] = vec3(float(gl_GlobalInvocationID.x / Resolution.x), float((gl_GlobalInvocationID.y + 1) / Resolution.y), float(gl_GlobalInvocationID.z / Resolution.z));
+		myVoxel.values[7] = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(0, 1, 0)).r;
 	
 
-	//Determine which of the 14 abstract possiblities that are present in the voxel
-	//Start by assuming that there are no triangles in the voxel
-	int possibilityIndex = 0;
-	if (myVoxel.values[0] < threshold) possibilityIndex |= 1;
-	if (myVoxel.values[1] < threshold) possibilityIndex |= 2;
-	if (myVoxel.values[2] < threshold) possibilityIndex |= 4;
-	if (myVoxel.values[3] < threshold) possibilityIndex |= 8;
-	if (myVoxel.values[4] < threshold) possibilityIndex |= 16;
-	if (myVoxel.values[5] < threshold) possibilityIndex |= 32;
-	if (myVoxel.values[6] < threshold) possibilityIndex |= 64;
-	if (myVoxel.values[7] < threshold) possibilityIndex |= 128;
+		//Determine which of the 14 abstract possiblities that are present in the voxel
+		//Start by assuming that there are no triangles in the voxel
+		int possibilityIndex = 0;
+		if (myVoxel.values[0] < threshold) possibilityIndex |= 1;
+		if (myVoxel.values[1] < threshold) possibilityIndex |= 2;
+		if (myVoxel.values[2] < threshold) possibilityIndex |= 4;
+		if (myVoxel.values[3] < threshold) possibilityIndex |= 8;
+		if (myVoxel.values[4] < threshold) possibilityIndex |= 16;
+		if (myVoxel.values[5] < threshold) possibilityIndex |= 32;
+		if (myVoxel.values[6] < threshold) possibilityIndex |= 64;
+		if (myVoxel.values[7] < threshold) possibilityIndex |= 128;
 
-	if(edgeTable[possibilityIndex] == 0){
-		//Surface does not pass through voxel
-	}
-	if(bool(edgeTable[possibilityIndex] & 1)){
-		vertexList[0] = vertexInterpolation(threshold, myVoxel.vertices[0], myVoxel.vertices[1], myVoxel.values[0], myVoxel.values[1]);
-	}
-	if(bool(edgeTable[possibilityIndex] & 2)){
-		vertexList[1] = vertexInterpolation(threshold, myVoxel.vertices[1], myVoxel.vertices[2], myVoxel.values[1], myVoxel.values[2]);
-	}
-	if(bool(edgeTable[possibilityIndex] & 4)){
-		vertexList[2] = vertexInterpolation(threshold, myVoxel.vertices[2], myVoxel.vertices[3], myVoxel.values[2], myVoxel.values[3]);
-	}
-	if(bool(edgeTable[possibilityIndex] & 8)){
-		vertexList[3] = vertexInterpolation(threshold, myVoxel.vertices[3], myVoxel.vertices[0], myVoxel.values[3], myVoxel.values[0]);
-	}
-	if(bool(edgeTable[possibilityIndex] & 16)){
-		vertexList[4] = vertexInterpolation(threshold, myVoxel.vertices[4], myVoxel.vertices[5], myVoxel.values[4], myVoxel.values[5]);
-	}
-	if(bool(edgeTable[possibilityIndex] & 32)){
-		vertexList[5] = vertexInterpolation(threshold, myVoxel.vertices[5], myVoxel.vertices[6], myVoxel.values[5], myVoxel.values[6]);
-	}
-	if(bool(edgeTable[possibilityIndex] & 64)){
-		vertexList[6] = vertexInterpolation(threshold, myVoxel.vertices[6], myVoxel.vertices[7], myVoxel.values[6], myVoxel.values[7]);
-	}
-	if(bool(edgeTable[possibilityIndex] & 128)){
-		vertexList[7] = vertexInterpolation(threshold, myVoxel.vertices[7], myVoxel.vertices[4], myVoxel.values[7], myVoxel.values[4]);
-	}
-	if(bool(edgeTable[possibilityIndex] & 256)){
-		vertexList[8] = vertexInterpolation(threshold, myVoxel.vertices[0], myVoxel.vertices[4], myVoxel.values[0], myVoxel.values[4]);
-	}
-	if(bool(edgeTable[possibilityIndex] & 512)){
-		vertexList[9] = vertexInterpolation(threshold, myVoxel.vertices[1], myVoxel.vertices[5], myVoxel.values[1], myVoxel.values[5]);
-	}
-	if(bool(edgeTable[possibilityIndex] & 1024)){
-		vertexList[10] = vertexInterpolation(threshold, myVoxel.vertices[2], myVoxel.vertices[6], myVoxel.values[2], myVoxel.values[6]);
-	}
-	if(bool(edgeTable[possibilityIndex] & 2048)){
-		vertexList[11] = vertexInterpolation(threshold, myVoxel.vertices[3], myVoxel.vertices[7], myVoxel.values[3], myVoxel.values[7]);
-	}
-	//Generate triangles
-	int numberOfTrianglesGenerated = 0;
-	for(int i = 0; int(texelFetch(triTable, ivec2(possibilityIndex,i), 0).r) != -1; i+=3){
-		Triangle t;
-		t.vertices[0] = vertexList[int(texelFetch(triTable, ivec2(possibilityIndex,i), 0).r)];
-		t.vertices[1] = vertexList[int(texelFetch(triTable, ivec2(possibilityIndex,i + 1), 0).r)];
-		t.vertices[2] = vertexList[int(texelFetch(triTable, ivec2(possibilityIndex,i + 2), 0).r)];
-		Out.triangles[offset + numberOfTrianglesGenerated] = t;
-		numberOfTrianglesGenerated++;
+		if(edgeTable[possibilityIndex] == 0){
+			//Surface does not pass through voxel
+		}
+		if(bool(edgeTable[possibilityIndex] & 1)){
+			vertexList[0] = vertexInterpolation(threshold, myVoxel.vertices[0], myVoxel.vertices[1], myVoxel.values[0], myVoxel.values[1]);
+		}
+		if(bool(edgeTable[possibilityIndex] & 2)){
+			vertexList[1] = vertexInterpolation(threshold, myVoxel.vertices[1], myVoxel.vertices[2], myVoxel.values[1], myVoxel.values[2]);
+		}
+		if(bool(edgeTable[possibilityIndex] & 4)){
+			vertexList[2] = vertexInterpolation(threshold, myVoxel.vertices[2], myVoxel.vertices[3], myVoxel.values[2], myVoxel.values[3]);
+		}
+		if(bool(edgeTable[possibilityIndex] & 8)){
+			vertexList[3] = vertexInterpolation(threshold, myVoxel.vertices[3], myVoxel.vertices[0], myVoxel.values[3], myVoxel.values[0]);
+		}
+		if(bool(edgeTable[possibilityIndex] & 16)){
+			vertexList[4] = vertexInterpolation(threshold, myVoxel.vertices[4], myVoxel.vertices[5], myVoxel.values[4], myVoxel.values[5]);
+		}
+		if(bool(edgeTable[possibilityIndex] & 32)){
+			vertexList[5] = vertexInterpolation(threshold, myVoxel.vertices[5], myVoxel.vertices[6], myVoxel.values[5], myVoxel.values[6]);
+		}
+		if(bool(edgeTable[possibilityIndex] & 64)){
+			vertexList[6] = vertexInterpolation(threshold, myVoxel.vertices[6], myVoxel.vertices[7], myVoxel.values[6], myVoxel.values[7]);
+		}
+		if(bool(edgeTable[possibilityIndex] & 128)){
+			vertexList[7] = vertexInterpolation(threshold, myVoxel.vertices[7], myVoxel.vertices[4], myVoxel.values[7], myVoxel.values[4]);
+		}
+		if(bool(edgeTable[possibilityIndex] & 256)){
+			vertexList[8] = vertexInterpolation(threshold, myVoxel.vertices[0], myVoxel.vertices[4], myVoxel.values[0], myVoxel.values[4]);
+		}
+		if(bool(edgeTable[possibilityIndex] & 512)){
+			vertexList[9] = vertexInterpolation(threshold, myVoxel.vertices[1], myVoxel.vertices[5], myVoxel.values[1], myVoxel.values[5]);
+		}
+		if(bool(edgeTable[possibilityIndex] & 1024)){
+			vertexList[10] = vertexInterpolation(threshold, myVoxel.vertices[2], myVoxel.vertices[6], myVoxel.values[2], myVoxel.values[6]);
+		}
+		if(bool(edgeTable[possibilityIndex] & 2048)){
+			vertexList[11] = vertexInterpolation(threshold, myVoxel.vertices[3], myVoxel.vertices[7], myVoxel.values[3], myVoxel.values[7]);
+		}
+		//Generate triangles
+		int numberOfTrianglesGenerated = 0;
+		for(int i = 0; int(texelFetch(triTable, ivec2(possibilityIndex,i), 0).r) != -1; i+=3){
+			Triangle t;
+			t.vertices[0] = vertexList[int(texelFetch(triTable, ivec2(possibilityIndex,i), 0).r)];
+			t.vertices[1] = vertexList[int(texelFetch(triTable, ivec2(possibilityIndex,i + 1), 0).r)];
+			t.vertices[2] = vertexList[int(texelFetch(triTable, ivec2(possibilityIndex,i + 2), 0).r)];
+			Out.triangles[offset + numberOfTrianglesGenerated] = t;
+			numberOfTrianglesGenerated++;
+		}
 	}
 
 

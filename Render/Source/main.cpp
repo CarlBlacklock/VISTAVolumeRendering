@@ -5,6 +5,7 @@
 #include "..\Headers\CompileShaders.h"
 #include "..\Headers\LoadDicom.h"
 #include "..\Headers\Camera.h"
+#include "..\Headers\marchingCubes.h"
 
 const GLint WIDTH = 640, HEIGHT = 480;
 GLFWwindow *window;
@@ -281,11 +282,11 @@ int main() {
 
 		return EXIT_FAILURE;
 	}
-
+	/*
 	int maxTextureSize; 
 	glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, &maxTextureSize);
 	std::cout << "Max Texture Size: " << maxTextureSize << std::endl;
-
+	*/
 	glViewport(0, 0, screenWidth, screenHeight);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetKeyCallback(window, key_callback);
@@ -319,7 +320,7 @@ int main() {
 	GLuint MovingPerspectiveRayCastingProgram = CompileShaders("../Shaders/MovingPerspectiveRayCastingVertex.vs", "../Shaders/MovingPerspectiveRayCastingFragment.fs");
 	GLuint MovingOrthoMIPProgram = CompileShaders("../Shaders/MovingOrthoMIPVertex.vs", "../Shaders/MovingOrthoMIPFragment.fs");
 	GLuint ComputeShaderProgram = CompileComputeShader("../Shaders/basicCompute.comp");
-	GLuint MarchingCubesProgram = CompileComputeShader("../Shaders/marchingCubes.comp");
+	
 
 	myCube = new DataCube();
 	myCamera = new Camera();
@@ -330,16 +331,14 @@ int main() {
 	//Read the volume data
 	int zDistance;
 	//unsigned char *volumeData = loadRAW("../Resources/Foot.raw", &zDistance);
-	
+	std::cout << "Loading Volume Data" << std::endl;
 	unsigned char *volumeData = LoadDicom("../Resources/exported/IMG-0001-", xResolution, yResolution, numberOfFiles);
 	if (nullptr == volumeData) {
 		std::cout << "Error loading volume data. Press any key to exit" << std::endl;
 		std::cin >> i;
 		return EXIT_FAILURE;
 	}
-	int testInt = 0;
-	testInt = testInt | (1 << 7);
-	std::cout << testInt << std::endl;
+	std::cout << "Volume Data Loaded. Calculating Gradients" << std::endl;
 	GLuint volumeID;
 	glGenTextures(1, &volumeID);
 	glActiveTexture(GL_TEXTURE0);
@@ -359,7 +358,7 @@ int main() {
 	glGenTextures(1, &gradientID);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_3D, gradientID);
-	glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA16F, xResolution, yResolution, numberOfFiles, 0, GL_RGBA, GL_FLOAT, NULL);
+	glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA32F, xResolution, yResolution, numberOfFiles, 0, GL_RGBA, GL_FLOAT, NULL);
 
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -367,7 +366,8 @@ int main() {
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
 
-	glBindImageTexture(1, gradientID, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA16F);
+	glBindImageTexture(1, gradientID, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+	
 
 	glUseProgram(ComputeShaderProgram);
 
@@ -380,8 +380,16 @@ int main() {
 	glDispatchCompute(xResolution, yResolution, numberOfFiles);
 
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-
+	glBindImageTexture(1, 0, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+	glFinish();
 	std::cout << "Gradients computed" << std::endl;
+
+	std::cout << "Marching cubes" << std::endl;
+	GLuint placeholderVAO;
+	int numberOfVerticesCalculated;
+	marchCubes(0.2f, &numberOfVerticesCalculated, &placeholderVAO, xResolution, yResolution, numberOfFiles);
+
+	std::cout << "Cubes marched" << std::endl;
 
 	viewingDir = glm::vec3(0.0, 0.0, 0.0) - myCamera->LookFrom;
 	viewingDir = glm::normalize(viewingDir);
@@ -395,8 +403,6 @@ int main() {
 	extents[3] = (float)yResolution;
 	extents[4] = 0.0f;
 	extents[5] = (float)numberOfFiles;
-
-
 
 	//Start the rendering
 	int numberOfFrames = 0;

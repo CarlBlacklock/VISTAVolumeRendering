@@ -143,6 +143,7 @@
   <ItemGroup>
     <None Include="..\Shaders\basicCompute.comp" />
     <None Include="..\Shaders\marchingCubes.comp" />
+    <None Include="..\Shaders\marchingCubesOffsetCalculations.comp" />
     <None Include="..\Shaders\marchingCubesVoxelClassification.comp" />
     <None Include="..\Shaders\MovingOrthoMIPFragment.fs" />
     <None Include="..\Shaders\MovingOrthoMIPVertex.vs" />

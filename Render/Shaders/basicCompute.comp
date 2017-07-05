@@ -1,7 +1,7 @@
 #version 430
 
 uniform sampler3D TextureSampler;
-layout(rgba16f, binding = 1) uniform image3D outputTexture;
+layout(rgba32f, binding = 1) uniform image3D outputTexture;
 uniform vec3 Resolution;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main(void){
