@@ -1,4 +1,1 @@
-﻿  marchingCubes.cpp
-d:\github\vistavolumerendering\render\source\marchingcubes.cpp(293): warning C4101: 'writeLocation': unreferenced local variable
-  Render.vcxproj -> D:\Github\VISTAVolumeRendering\Render\Debug\Render.exe
-  Render.vcxproj -> D:\Github\VISTAVolumeRendering\Render\Debug\Render.pdb (Partial PDB)
+﻿

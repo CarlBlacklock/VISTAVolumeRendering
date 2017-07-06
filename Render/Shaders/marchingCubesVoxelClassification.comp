@@ -92,9 +92,6 @@ Vertex vertexInterpolation(float threshold, vec3 p1, vec3 p2, float p1Val, float
 
 
 void main(void){
-	vec3 emptySpace = vec3(0.0);
-	vec4 noColor = vec4(0.0);
-	Vertex vertexList[12] = {{emptySpace, noColor}, {emptySpace, noColor}, {emptySpace, noColor}, {emptySpace, noColor}, {emptySpace, noColor}, {emptySpace, noColor}, {emptySpace, noColor}, {emptySpace, noColor}, {emptySpace, noColor}, {emptySpace, noColor}, {emptySpace, noColor}, {emptySpace, noColor}};
 	ivec3 readLocation = ivec3(gl_GlobalInvocationID.x, gl_GlobalInvocationID.y, gl_GlobalInvocationID.z);
 	Voxel myVoxel;
 	//Read vertex data and store in corrisponding variables
@@ -146,7 +143,6 @@ void main(void){
 	for(int i = 0; int(texelFetch(triTable, ivec2(possibilityIndex,i), 0).r) != -1; i+=3){
 		numberOfTrianglesGenerated++;
 	}
-	//numberOfTrianglesGenerated = numberOfTrianglesGenerated + int(Resolution.x);
 	imageStore(numberOfTrianglesMap, ivec3(gl_GlobalInvocationID), ivec4(numberOfTrianglesGenerated, 0, 0, 0));
 
 }

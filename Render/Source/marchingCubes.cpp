@@ -278,8 +278,7 @@ void marchCubes(float threshold, int *numberOfVerticesGenerated, GLuint *VAO, in
 
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_3D, numberOfTrianglesMap);
-	std::vector<GLint> emptyData((xResolution-1) * (yResolution-1) * (numberOfFiles-1), 0);
-	glTexImage3D(GL_TEXTURE_3D, 0, GL_R32I, xResolution-1, yResolution-1, numberOfFiles-1, 0, GL_RED_INTEGER, GL_INT, &emptyData[0]);
+	glTexImage3D(GL_TEXTURE_3D, 0, GL_R32I, xResolution-1, yResolution-1, numberOfFiles-1, 0, GL_RED_INTEGER, GL_INT, NULL);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -288,7 +287,10 @@ void marchCubes(float threshold, int *numberOfVerticesGenerated, GLuint *VAO, in
 
 	glBindImageTexture(2, numberOfTrianglesMap, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_R32I);
 
-	glUseProgram(MarchingCubesOffsetProgram);
+	glUseProgram(MarchingCubesClassificationProgram);
+	while ((errorType = glGetError()) != GL_NO_ERROR) {
+
+	}
 
 	GLint readLocation, writeLocation, triTableLocation, resolutionLocation, thresholdLocation;
 	readLocation = glGetUniformLocation(MarchingCubesClassificationProgram, "TextureSampler");
@@ -296,21 +298,31 @@ void marchCubes(float threshold, int *numberOfVerticesGenerated, GLuint *VAO, in
 
 	triTableLocation = glGetUniformLocation(MarchingCubesClassificationProgram, "triTable");
 	glUniform1i(triTableLocation, 2);
+	while ((errorType = glGetError()) != GL_NO_ERROR) {
 
+	}
 	thresholdLocation = glGetUniformLocation(MarchingCubesClassificationProgram, "threshold");
 	glUniform1f(thresholdLocation, threshold);
+	while ((errorType = glGetError()) != GL_NO_ERROR) {
 
+	}
 	GLint uniforms;
 	glGetProgramiv(MarchingCubesClassificationProgram, GL_ACTIVE_UNIFORMS, &uniforms);
 
 	glm::vec3 Resolution = glm::vec3(xResolution, yResolution, numberOfFiles);
 	resolutionLocation = glGetUniformLocation(MarchingCubesClassificationProgram, "Resolution");
+	while ((errorType = glGetError()) != GL_NO_ERROR) {
+
+	}
 	glUniform3fv(resolutionLocation, 1, glm::value_ptr(Resolution));
 	GLint sizes[3];
 	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, &sizes[0]);
 	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 1, &sizes[1]);
 	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 2, &sizes[2]);
 	std::cout << "Max x: " << sizes[0] << " Max y: " << sizes[1] << " Max z: " << sizes[2] << std::endl;
+	GLint imageUnits;
+	glGetIntegerv(GL_MAX_COMPUTE_TEXTURE_IMAGE_UNITS, &imageUnits);
+	std::cout << "Number of image units" << imageUnits << std::endl;
 	glDispatchCompute(2, 1, 1);
 	while ((errorType = glGetError()) != GL_NO_ERROR) {
 
@@ -326,7 +338,7 @@ void marchCubes(float threshold, int *numberOfVerticesGenerated, GLuint *VAO, in
 	}
 	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_3D, offsetOutput);
-	glTexImage3D(GL_TEXTURE_3D, 0, GL_R32I, xResolution - 1, yResolution - 1, numberOfFiles - 1, 0, GL_RED_INTEGER, GL_INT, &emptyData[0]);
+	glTexImage3D(GL_TEXTURE_3D, 0, GL_R32I, xResolution - 1, yResolution - 1, numberOfFiles - 1, 0, GL_RED_INTEGER, GL_INT, NULL);
 	
 	while ((errorType = glGetError()) != GL_NO_ERROR) {
 
