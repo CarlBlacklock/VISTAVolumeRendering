@@ -5,7 +5,7 @@
 #include "..\Headers\CompileShaders.h"
 #include "..\Headers\LoadDicom.h"
 #include "..\Headers\Camera.h"
-#include "..\Headers\marchingCubes.h"
+#include "..\Headers\Utilities.h"
 
 const GLint WIDTH = 640, HEIGHT = 480;
 GLFWwindow *window;
@@ -35,6 +35,10 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	if (!(width == 0 || height == 0)) {
 		FrustrumMatrix = glm::perspective(degreesToRadians((float)45.0f), (float)width / (float)height, 0.1f, 100.0f);
 	}
+}
+
+void histogram_framebuffer_size_callback(GLFWwindow *histogramWindow, int width, int height) {
+	glViewport(0, 0, width, height);
 }
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -259,10 +263,12 @@ int main() {
 	int i;
 	glfwInit();
 	window = CreateWindow(WIDTH, HEIGHT, "Rendering", nullptr, nullptr);
+	GLFWwindow* globalHistogramWindow;
+	globalHistogramWindow = CreateWindow(300, 100, "Global Histogram", nullptr, nullptr);
 
 	int screenWidth, screenHeight;
 
-	glfwGetFramebufferSize(window, &screenWidth, &screenHeight);
+	
 
 	if (nullptr == window) {
 		std::cout << "Failed to create GLFW window" << std::endl;
@@ -271,7 +277,7 @@ int main() {
 
 		return EXIT_FAILURE;
 	}
-
+	glfwGetFramebufferSize(window, &screenWidth, &screenHeight);
 	glfwMakeContextCurrent(window);
 
 	glewExperimental = GL_TRUE;
@@ -282,6 +288,7 @@ int main() {
 
 		return EXIT_FAILURE;
 	}
+
 	/*
 	int maxTextureSize; 
 	glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, &maxTextureSize);
@@ -338,7 +345,7 @@ int main() {
 		std::cin >> i;
 		return EXIT_FAILURE;
 	}
-	std::cout << "Volume Data Loaded. Calculating Gradients" << std::endl;
+	std::cout << "Volume Data Loaded" << std::endl;
 	GLuint volumeID;
 	glGenTextures(1, &volumeID);
 	glActiveTexture(GL_TEXTURE0);
@@ -355,41 +362,12 @@ int main() {
 	free(volumeData);
 
 	GLuint gradientID;
-	glGenTextures(1, &gradientID);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_3D, gradientID);
-	glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA32F, xResolution, yResolution, numberOfFiles, 0, GL_RGBA, GL_FLOAT, NULL);
-
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
-
-	glBindImageTexture(1, gradientID, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+	calculateGradients(ComputeShaderProgram, xResolution, yResolution, numberOfFiles, &gradientID);
 	
 
-	glUseProgram(ComputeShaderProgram);
+	
+	//marchCubes(0.2f, &numberOfVerticesCalculated, &placeholderVAO, xResolution, yResolution, numberOfFiles);
 
-	GLint readLocation, writeLocation;
-	readLocation = glGetUniformLocation(ComputeShaderProgram, "TextureSampler");
-	glUniform1i(readLocation, 0);
-	writeLocation = glGetUniformLocation(ComputeShaderProgram, "outputTexture");
-	glUniform1i(writeLocation, 1);
-
-	glDispatchCompute(xResolution, yResolution, numberOfFiles);
-
-	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-	glBindImageTexture(1, 0, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA32F);
-	glFinish();
-	std::cout << "Gradients computed" << std::endl;
-
-	std::cout << "Marching cubes" << std::endl;
-	GLuint placeholderVAO;
-	int numberOfVerticesCalculated;
-	marchCubes(0.2f, &numberOfVerticesCalculated, &placeholderVAO, xResolution, yResolution, numberOfFiles);
-
-	std::cout << "Cubes marched" << std::endl;
 
 	viewingDir = glm::vec3(0.0, 0.0, 0.0) - myCamera->LookFrom;
 	viewingDir = glm::normalize(viewingDir);

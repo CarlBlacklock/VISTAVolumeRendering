@@ -126,19 +126,19 @@
     <ClCompile Include="..\Source\DataCube.cpp" />
     <ClCompile Include="..\Source\LoadDicom.cpp" />
     <ClCompile Include="..\Source\main.cpp" />
-    <ClCompile Include="..\Source\marchingCubes.cpp" />
     <ClCompile Include="..\Source\RAWLoader.cpp" />
     <ClCompile Include="..\Source\ScreenFillingQuad.cpp" />
+    <ClCompile Include="..\Source\Utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Headers\Camera.h" />
     <ClInclude Include="..\Headers\DataCube.h" />
     <ClInclude Include="..\Headers\LoadDicom.h" />
-    <ClInclude Include="..\Headers\marchingCubes.h" />
     <ClInclude Include="..\Headers\RAWLoader.h" />
     <ClInclude Include="..\Headers\Render.h" />
     <ClInclude Include="..\Headers\OpenGLincludes.h" />
     <ClInclude Include="..\Headers\ScreenFillingQuad.h" />
+    <ClInclude Include="..\Headers\Utilities.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Shaders\basicCompute.comp" />

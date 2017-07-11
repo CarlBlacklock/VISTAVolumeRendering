@@ -39,7 +39,7 @@
     <ClCompile Include="..\Source\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\marchingCubes.cpp">
+    <ClCompile Include="..\Source\Utilities.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -65,7 +65,7 @@
     <ClInclude Include="..\Headers\Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Headers\marchingCubes.h">
+    <ClInclude Include="..\Headers\Utilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
