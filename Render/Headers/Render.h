@@ -5,10 +5,14 @@
 #include <vector>
 #include <cstring>
 #include <string>
+#include <mutex>
 #define degreesToRadians(x) x*(3.141592f/180.0f)
 typedef struct Vertex {
 	GLfloat position[3];
 }Vertex;
+typedef struct Vertex2d{
+	GLfloat position[2];
+}Vertex2d;
 
 typedef struct texCoord {
 	GLfloat texCoordinate[2];
