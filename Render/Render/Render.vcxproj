@@ -124,24 +124,33 @@
     <ClCompile Include="..\Source\CompileShaders.cpp" />
     <ClCompile Include="..\Source\CreateWindow.cpp" />
     <ClCompile Include="..\Source\DataCube.cpp" />
+    <ClCompile Include="..\Source\Histogram.cpp" />
     <ClCompile Include="..\Source\LoadDicom.cpp" />
     <ClCompile Include="..\Source\main.cpp" />
     <ClCompile Include="..\Source\RAWLoader.cpp" />
+    <ClCompile Include="..\Source\renderGlobalHistogram.cpp" />
+    <ClCompile Include="..\Source\renderLocalHistogram.cpp" />
+    <ClCompile Include="..\Source\renderVolume.cpp" />
     <ClCompile Include="..\Source\ScreenFillingQuad.cpp" />
     <ClCompile Include="..\Source\Utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Headers\Camera.h" />
     <ClInclude Include="..\Headers\DataCube.h" />
+    <ClInclude Include="..\Headers\Histogram.h" />
     <ClInclude Include="..\Headers\LoadDicom.h" />
     <ClInclude Include="..\Headers\RAWLoader.h" />
     <ClInclude Include="..\Headers\Render.h" />
     <ClInclude Include="..\Headers\OpenGLincludes.h" />
+    <ClInclude Include="..\Headers\renderThreads.h" />
     <ClInclude Include="..\Headers\ScreenFillingQuad.h" />
     <ClInclude Include="..\Headers\Utilities.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Shaders\basicCompute.comp" />
+    <None Include="..\Shaders\globalHistogram.fs" />
+    <None Include="..\Shaders\globalHistogram.vs" />
+    <None Include="..\Shaders\localHistogram.comp" />
     <None Include="..\Shaders\marchingCubes.comp" />
     <None Include="..\Shaders\marchingCubesOffsetCalculations.comp" />
     <None Include="..\Shaders\marchingCubesVoxelClassification.comp" />
@@ -155,6 +164,8 @@
     <None Include="..\Shaders\OrthoMIPVertex.vs" />
     <None Include="..\Shaders\OrthoRayCastingFragment.fs" />
     <None Include="..\Shaders\OrthoRayCastingVertex.vs" />
+    <None Include="..\Shaders\test.fs" />
+    <None Include="..\Shaders\test.vs" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\Resources\triTable.txt" />

@@ -10,7 +10,7 @@ public:
 	DataCube();
 	void CleanUp();
 	void DrawDataCube(GLuint program, GLuint volumeData);
-	void DrawDataCubeOrthoView(GLuint program, GLuint volumeData, GLuint gradientID, glm::mat4 OrthoMatrix, glm::mat4 ViewMatrix, glm::vec3 ViewingDir, glm::vec3 Resolution, glm::vec2 mousePosition, Light aLight, float *extents);
+	void DrawDataCubeOrthoView(GLuint program, GLuint volumeData, glm::mat4 OrthoMatrix, glm::mat4 ViewMatrix, glm::vec3 ViewingDir, glm::vec3 Resolution, glm::vec2 mousePosition, float *extents);
 	void MultiplyModelMatrix(glm::mat4 Transformation);
 	void ResetModelMatrix();
 	~DataCube();

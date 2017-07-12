@@ -42,6 +42,18 @@
     <ClCompile Include="..\Source\Utilities.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\Histogram.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\renderVolume.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\renderGlobalHistogram.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\renderLocalHistogram.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Headers\OpenGLincludes.h">
@@ -68,6 +80,12 @@
     <ClInclude Include="..\Headers\Utilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\Headers\Histogram.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Headers\renderThreads.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Shaders\OrthoRayCastingFragment.fs" />
@@ -84,6 +102,11 @@
     <None Include="..\Shaders\marchingCubes.comp" />
     <None Include="..\Shaders\marchingCubesVoxelClassification.comp" />
     <None Include="..\Shaders\marchingCubesOffsetCalculations.comp" />
+    <None Include="..\Shaders\globalHistogram.vs" />
+    <None Include="..\Shaders\globalHistogram.fs" />
+    <None Include="..\Shaders\test.vs" />
+    <None Include="..\Shaders\test.fs" />
+    <None Include="..\Shaders\localHistogram.comp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\Resources\triTable.txt" />
