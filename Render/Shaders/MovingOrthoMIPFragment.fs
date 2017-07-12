@@ -12,7 +12,8 @@ uniform float yMaxExtent;
 uniform float zMinExtent;
 uniform float zMaxExtent;
 
-out vec4 color;
+layout(location = 0) out vec4 color;
+layout(location = 1) out vec3 position;
 
 void main(void){
 	int depth = 256;
@@ -39,5 +40,6 @@ void main(void){
 		}
 		currentPos += step;
 	}
+	position = currentPos;
 
 }

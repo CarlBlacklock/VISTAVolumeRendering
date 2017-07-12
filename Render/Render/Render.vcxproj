@@ -129,6 +129,7 @@
     <ClCompile Include="..\Source\main.cpp" />
     <ClCompile Include="..\Source\RAWLoader.cpp" />
     <ClCompile Include="..\Source\renderGlobalHistogram.cpp" />
+    <ClCompile Include="..\Source\renderLocalHistogram.cpp" />
     <ClCompile Include="..\Source\renderVolume.cpp" />
     <ClCompile Include="..\Source\ScreenFillingQuad.cpp" />
     <ClCompile Include="..\Source\Utilities.cpp" />
@@ -149,6 +150,7 @@
     <None Include="..\Shaders\basicCompute.comp" />
     <None Include="..\Shaders\globalHistogram.fs" />
     <None Include="..\Shaders\globalHistogram.vs" />
+    <None Include="..\Shaders\localHistogram.comp" />
     <None Include="..\Shaders\marchingCubes.comp" />
     <None Include="..\Shaders\marchingCubesOffsetCalculations.comp" />
     <None Include="..\Shaders\marchingCubesVoxelClassification.comp" />
@@ -162,6 +164,8 @@
     <None Include="..\Shaders\OrthoMIPVertex.vs" />
     <None Include="..\Shaders\OrthoRayCastingFragment.fs" />
     <None Include="..\Shaders\OrthoRayCastingVertex.vs" />
+    <None Include="..\Shaders\test.fs" />
+    <None Include="..\Shaders\test.vs" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\Resources\triTable.txt" />

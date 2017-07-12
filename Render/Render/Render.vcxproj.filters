@@ -51,6 +51,9 @@
     <ClCompile Include="..\Source\renderGlobalHistogram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\renderLocalHistogram.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Headers\OpenGLincludes.h">
@@ -101,6 +104,9 @@
     <None Include="..\Shaders\marchingCubesOffsetCalculations.comp" />
     <None Include="..\Shaders\globalHistogram.vs" />
     <None Include="..\Shaders\globalHistogram.fs" />
+    <None Include="..\Shaders\test.vs" />
+    <None Include="..\Shaders\test.fs" />
+    <None Include="..\Shaders\localHistogram.comp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\Resources\triTable.txt" />

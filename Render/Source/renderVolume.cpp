@@ -3,7 +3,7 @@
 #include "..\Headers\CompileShaders.h"
 #include "..\Headers\Camera.h"
 #include "..\Headers\Utilities.h"
-
+#include "..\Headers\ScreenFillingQuad.h"
 //Signal used to determine if the thread should die
 
 extern bool volumeRenderClosed;
@@ -17,6 +17,9 @@ extern int yResolution;
 extern int numberOfFiles;
 extern std::mutex statusMutex;
 extern int status;
+extern glm::vec3 focus;
+extern std::mutex focusLock;
+extern bool focusChanged;
 
 const GLint WIDTH = 640, HEIGHT = 480;
 GLFWwindow *window;
@@ -30,6 +33,10 @@ double animateStart;
 glm::vec2 mousePosition = glm::vec2((float)0.0f, (float)0.0f);
 GLuint crossSectionExtents;
 float *extents;
+float cursorVolumePosition[3] = { 0.0f, 0.0f, 0.0f };;
+
+GLuint fboHandle, colorTex, posTex, depthTex;
+bool fboTexturesGenerated = false;
 
 DataCube* myCube;
 int xMinState, xMaxState, yMinState, yMaxState, zMinState, zMaxState;
@@ -43,6 +50,46 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 	if (!(width == 0 || height == 0)) {
 		FrustrumMatrix = glm::perspective(degreesToRadians((float)45.0f), (float)width / (float)height, 0.1f, 100.0f);
+		if (fboTexturesGenerated) {
+			glBindRenderbuffer(GL_RENDERBUFFER, depthTex);
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+
+			glBindTexture(GL_TEXTURE_2D, colorTex);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
+
+			glBindTexture(GL_TEXTURE_2D, posTex);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
+		}
+	}
+}
+
+static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
+	if (fboTexturesGenerated && renderMode == 0 && focusLock.try_lock()) {
+		glBindFramebuffer(GL_FRAMEBUFFER, fboHandle);
+		glReadBuffer(GL_COLOR_ATTACHMENT1);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		glReadPixels((GLint)xpos, (GLint)ypos, 1, 1, GL_RGB, GL_FLOAT, cursorVolumePosition);
+		//focus = glm::vec3(cursorVolumePosition[0], cursorVolumePosition[1], cursorVolumePosition[2]);
+		focus = glm::vec3(cursorVolumePosition[0], cursorVolumePosition[1], cursorVolumePosition[2]);
+		//focusChanged = true;
+		focusLock.unlock();
+		//std::cout << "X pos: " << std::setprecision(15) << cursorVolumePosition[0] << " Y pos: " << cursorVolumePosition[1] << " Z pos: " << cursorVolumePosition[2];
+	}
+}
+
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+		if (fboTexturesGenerated && renderMode == 0 && focusLock.try_lock()) {
+			glBindFramebuffer(GL_FRAMEBUFFER, fboHandle);
+			glReadBuffer(GL_COLOR_ATTACHMENT1);
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+			focus = glm::vec3(cursorVolumePosition[0], cursorVolumePosition[1], cursorVolumePosition[2]);
+			//focusChanged = true;
+			focusLock.unlock();
+			//std::cout << "X pos: " << std::setprecision(15) << cursorVolumePosition[0] << " Y pos: " << cursorVolumePosition[1] << " Z pos: " << cursorVolumePosition[2] << std::endl;
+			focusChanged = true;
+		}
 	}
 }
 
@@ -240,7 +287,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 				//glfwGetCursorPos sets coordinates to NULL when they are undefined
 				//Update stored mouse position
 				mousePosition = glm::vec2((float)tempX, (float)tempY);
-				std::cout << "Mouse Position set to: " << tempX << ", " << tempY << std::endl;
+				std::cout << "Mouse Position set to: " << std::setprecision(15) << tempX << ", " << tempY << std::endl;
 			}
 			break;
 
@@ -291,6 +338,8 @@ void renderVolume() {
 	glViewport(0, 0, screenWidth, screenHeight);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetKeyCallback(window, key_callback);
+	glfwSetCursorPosCallback(window, cursor_position_callback);
+	glfwSetMouseButtonCallback(window, mouse_button_callback);
 	//Enable depth testing and set depth function to less than or equal
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
@@ -305,7 +354,7 @@ void renderVolume() {
 	glm::mat4 ViewMatrix = glm::lookAt(LookFrom, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	*/
 	//Set up view matrix and frustrum matrix
-	glm::mat4 OrthoMatrix = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, 0.10f, 100.0f);
+	glm::mat4 OrthoMatrix = glm::ortho(-.750f, 0.750f, -0.750f, 0.750f, 0.10f, 100.0f);
 	FrustrumMatrix = glm::perspective(degreesToRadians((float)45.0f), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
 
 
@@ -321,6 +370,7 @@ void renderVolume() {
 	GLuint MovingPerspectiveRayCastingProgram = CompileShaders("../Shaders/MovingPerspectiveRayCastingVertex.vs", "../Shaders/MovingPerspectiveRayCastingFragment.fs");
 	GLuint MovingOrthoMIPProgram = CompileShaders("../Shaders/MovingOrthoMIPVertex.vs", "../Shaders/MovingOrthoMIPFragment.fs");
 	GLuint ComputeShaderProgram = CompileComputeShader("../Shaders/basicCompute.comp");
+	GLuint ScreenFillingQuadProgram = CompileShaders("../Shaders/test.vs", "../Shaders/test.fs");
 
 	myCube = new DataCube();
 	myCamera = new Camera();
@@ -362,6 +412,45 @@ void renderVolume() {
 	extents[4] = 0.0f;
 	extents[5] = (float)numberOfFiles;
 
+	//Generate fbo
+	glGenTextures(1, &colorTex);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, colorTex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screenWidth, screenHeight, 0, GL_RGBA, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glGenTextures(1, &posTex);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, posTex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screenWidth, screenHeight, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glGenRenderbuffers(1, &depthTex);
+	glBindRenderbuffer(GL_RENDERBUFFER, depthTex);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screenWidth, screenHeight);
+
+	glGenFramebuffers(1, &fboHandle);
+	glBindFramebuffer(GL_FRAMEBUFFER, fboHandle);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTex, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, posTex, 0);
+
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthTex);
+
+	GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+	glDrawBuffers(2, drawBuffers);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	fboTexturesGenerated = true;
+
+	//Create screen filling quad
+	ScreenFillingQuad myQuad = ScreenFillingQuad();
 	//Start the rendering
 	int numberOfFrames = 0;
 	char title[512];
@@ -388,10 +477,16 @@ void renderVolume() {
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		if (renderMode == 1) {
-			myCube->DrawDataCubeOrthoView(MovingOrthoRayCastingProgram, volumeID, gradientID, OrthoMatrix, myCamera->ViewMatrix, myCamera->ViewDir, Resolution, mousePosition, myLight, extents);
+			myCube->DrawDataCubeOrthoView(MovingOrthoRayCastingProgram, volumeID, OrthoMatrix, myCamera->ViewMatrix, myCamera->ViewDir, Resolution, mousePosition, extents);
 		}
 		if (renderMode == 0) {
-			myCube->DrawDataCubeOrthoView(MovingOrthoMIPProgram, volumeID, gradientID, OrthoMatrix, myCamera->ViewMatrix, myCamera->ViewDir, Resolution, mousePosition, myLight, extents);
+			glBindFramebuffer(GL_FRAMEBUFFER, fboHandle);
+			glDrawBuffers(2, drawBuffers);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			myCube->DrawDataCubeOrthoView(MovingOrthoMIPProgram, volumeID, OrthoMatrix, myCamera->ViewMatrix, myCamera->ViewDir, Resolution, mousePosition, extents);
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			
+			myQuad.DrawScreenFillingQuad(ScreenFillingQuadProgram, OrthoMatrix, myCamera->ViewMatrix, colorTex);
 		}
 		//myCube.DrawDataCubeOrthoView(MovingPerspectiveRayCastingProgram, volumeID, gradientID, OrthoMatrix, ViewMatrix, viewingDir, Resolution, myLight);
 		//myCube.DrawDataCube(OrthoMIPProgram, volumeID);
@@ -416,6 +511,12 @@ void renderVolume() {
 	glDeleteProgram(MovingPerspectiveRayCastingProgram);
 	glDeleteTextures(1, &volumeID);
 	myCube->CleanUp();
+	myQuad.CleanUp();
+	glDeleteProgram(ScreenFillingQuadProgram);
+	glDeleteTextures(1, &colorTex);
+	glDeleteTextures(1, &posTex);
+	glDeleteRenderbuffers(1, &depthTex);
+	glDeleteFramebuffers(1, &fboHandle);
 	glDeleteTextures(1, &gradientID);
 	free(extents);
 	return;

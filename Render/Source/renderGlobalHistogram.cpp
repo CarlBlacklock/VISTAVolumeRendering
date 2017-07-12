@@ -1,6 +1,7 @@
 #include "..\Headers\renderThreads.h"
 #include "..\Headers\CompileShaders.h"
 #include "..\Headers\Histogram.h"
+#include "..\Headers\ScreenFillingQuad.h"
 
 
 //Signal used to determine if the thread should die
@@ -18,7 +19,7 @@ extern int status;
 void histogram_framebuffer_size_callback(GLFWwindow *histogramWindow, int width, int height) {
 	glViewport(0, 0, width, height);
 }
-void renderGlobalHistogram() {
+void renderGlobalHistogram(int numberOfSubdivisions) {
 	int i;
 	GLFWwindow* globalHistogramWindow;
 	globalHistogramWindow = CreateWindow(500, 200, "Global Histogram", nullptr, nullptr);
@@ -33,6 +34,7 @@ void renderGlobalHistogram() {
 
 	glfwGetFramebufferSize(globalHistogramWindow, &screenWidth, &screenHeight);
 	glfwMakeContextCurrent(globalHistogramWindow);
+	/*
 	glewExperimental = GL_TRUE;
 
 	if (GLEW_OK != glewInit()) {
@@ -41,19 +43,22 @@ void renderGlobalHistogram() {
 
 		return;
 	}
+	*/
 	glViewport(0, 0, screenWidth, screenHeight);
 	
 	
 	glfwSetFramebufferSizeCallback(globalHistogramWindow, histogram_framebuffer_size_callback);
-	Histogram globalHistogram = Histogram(5, volumeData, xResolution, yResolution, numberOfFiles);
+	Histogram globalHistogram = Histogram(numberOfSubdivisions, volumeData, xResolution, yResolution, numberOfFiles);
 	
-	GLuint HistogramProgram = CompileShaders("../Shaders/globalHistogram.vs", "../Shaders/global/Histogram.fs");
+	GLuint HistogramProgram = CompileShaders("../Shaders/globalHistogram.vs", "../Shaders/globalHistogram.fs");
+	//GLuint TestProgram = CompileShaders("../Shaders/test.vs", "../Shaders/global/Histogram.fs");
 
-	glm::mat4 OrthoMatrix = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f);
+	glm::mat4 OrthoMatrix = glm::ortho(0.0f, 1.5f, 0.0f, 1.0f);
 
 	statusMutex.lock();
 	status++;
 	statusMutex.unlock();
+
 
 	while (!(glfwWindowShouldClose(globalHistogramWindow) || globalHistoShouldClose)) {
 		glfwPollEvents();
@@ -65,6 +70,7 @@ void renderGlobalHistogram() {
 
 		}
 		globalHistogram.DrawHistogram(HistogramProgram, OrthoMatrix);
+		//test.DrawScreenFillingQuad(HistogramProgram, OrthoMatrix, OrthoMatrix, (GLuint)1);
 		glfwSwapBuffers(globalHistogramWindow);
 	}
 	glDeleteProgram(HistogramProgram);

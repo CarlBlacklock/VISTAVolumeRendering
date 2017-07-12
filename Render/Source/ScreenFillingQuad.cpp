@@ -89,10 +89,7 @@ void ScreenFillingQuad::DrawScreenFillingQuad(GLuint program, glm::mat4 Frustrum
 	glUniformMatrix4fv(FrustrumLocation, 1, GL_FALSE, glm::value_ptr(FrustrumMatrix));
 
 	textureLocation = glGetUniformLocation(program, "TextureSampler");
-	glUniform1i(textureLocation, 0);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_3D,texture);
+	glUniform1i(textureLocation, 2);
 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 

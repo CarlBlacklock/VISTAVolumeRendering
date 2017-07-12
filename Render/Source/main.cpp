@@ -12,16 +12,19 @@ std::mutex statusMutex;
 int status = 0;
 
 bool globalHistoClosed = false;
+bool localHistoClosed = false;
 
 extern bool globalHistoShouldClose;
 bool volumeRenderClosed = false;
 extern bool volumeRenderShouldClose;
 extern bool GLEWINIT;
+extern bool localHistoShouldClose;
 
 
 
 int main() {
 	int i; 
+	int numberOfSubdivisions = 10;
 	if (!glfwInit()) {
 		std::cout << "Failed to initialize glfw" << std::endl;
 	}
@@ -36,14 +39,15 @@ int main() {
 		return EXIT_FAILURE;
 	}
 	std::cout << "Volume Data Loaded" << std::endl;
-	/*
+	
 	std::thread volumeRender(renderVolume);
 	while (!GLEWINIT) {
 
 	}
-	*/
-	std::thread globalHistoRender(renderGlobalHistogram);
-	while (status < 1 && !(globalHistoClosed || volumeRenderClosed)) {
+	
+	std::thread globalHistoRender(renderGlobalHistogram, numberOfSubdivisions);
+	std::thread localHistoRender(renderLocalHistogram, numberOfSubdivisions);
+	while (status < 2 && !(globalHistoClosed || volumeRenderClosed)) {
 		//Wait until all threads are finished using the volume data
 	}
 	std::cout << "All threads done with volume data" << std::endl;
@@ -51,14 +55,19 @@ int main() {
 		//One of the threads terminated
 		//Send the signal to end
 		volumeRenderShouldClose = true;
+		localHistoShouldClose = true;
 
 	}
 	else if (volumeRenderClosed) {
 		globalHistoShouldClose = true;
+		localHistoShouldClose = true;
+	}
+	else if (localHistoClosed) {
+		volumeRenderShouldClose = true;
+		globalHistoShouldClose = true;
 	}
 	
-	free(volumeData);
-	std::cout << "Volume Data released" << std::endl;
+	
 	while (!(globalHistoClosed || volumeRenderClosed)) {
 		//Wait on the threads
 		
@@ -78,5 +87,10 @@ int main() {
 	glfwTerminate();
 
 	globalHistoRender.join();
+	volumeRender.join();
+	localHistoRender.join();
+
+	free(volumeData);
+	std::cout << "Volume Data released" << std::endl;
 	return EXIT_SUCCESS;
 }

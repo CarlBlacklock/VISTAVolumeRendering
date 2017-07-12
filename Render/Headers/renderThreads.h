@@ -3,4 +3,6 @@
 
 void renderVolume();
 
-void renderGlobalHistogram();
+void renderGlobalHistogram(int numberOfSubdivisions);
+
+void renderLocalHistogram(int numberOfSubdivisions);
