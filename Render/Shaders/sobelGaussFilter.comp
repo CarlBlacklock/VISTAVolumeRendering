@@ -88,17 +88,17 @@ void main(void){
 
 	float dZMinusOne = -s212 - 2.0 * s012 - s112 - 2.0 * s202 - 4.0 * s002 - 2.0 * s102 - s222 - 2.0 * s022 - s122;
 	float dZPlusOne = s211 + 2.0 * s011 + s111 + 2.0 * s201 + 4.0 * s001 + 2.0 * s101 + s221 + 2.0 * s021 + s121;
-	float dfdz = (dZMinusOne / 16.0) + (dZPlusOne / 16.0);
+	float dfdz = (dZMinusOne  + dZPlusOne) / 32.0;
 	
 	float dYMinusOne =  -s222 - 2.0 * s022 - s122 + s212 + 2.0 * s012 + s112;
 	float dY = -2.0 * s220 - 4.0 * s020 - 2.0 * s120 + 2.0 * s210 + 4.0 * s010 + 2.0 * s110;
 	float dYPlusOne =  -s221 - 2.0 * s021 -s121 + s211 + 2.0 * s011 + s111;
-	float dfdy = (dYPlusOne / 8.0) + (dY / 16.0) + (dYMinusOne / 8.0);
+	float dfdy = (dYPlusOne + dY + dYMinusOne) / 32.0;
 	
 	float dXMinusOne = -s212 - 2.0 * s202 -s222 + s112 + 2.0 * s102 + s122;
 	float dX = -2.0 * s210 - 4.0 * s200 - 2.0 * s220 + 2.0 * s110 + 4.0 * s100 + 2.0 * s120;
 	float dXPlusOne = -s211 - 2.0 * s201 - s221 + s111 + 2.0 * s101 + s121;
-	float dfdx = (dXMinusOne / 8.0) + (dX / 16.0) + (dXPlusOne / 8.0);
+	float dfdx = (dXMinusOne + dX + dXPlusOne) / 32.0;
 	
 	float f = length(vec3(dfdx, dfdy, dfdz));
 
@@ -107,14 +107,33 @@ void main(void){
 	//	2	4	2		4	8	4		2	4	2
 	//	1	2	1		2	4	2		1	2	1
 	//		z-1				z				z+1
-	
-	float zMinusOne = s212 + 2.0 * s012 + s112 + 2.0 * s202 + 4.0 * s002 + 2.0 * s102 + s222 + 2.0 * s022 + s122;
-	
-	float z = 2.0 * s210 + 4.0 * s010 + 2.0 * s110 + 4.0 * s200 + 8.0 * s000 + 4.0 * s100 + 2.0 * s220 + 4.0 * s020 + 2.0 * s120;
 
-	float zPlusOne = s211 + 2.0 * s011 + s111 + 2.0 * s201 + 4.0 * s001 + 2.0 * s101 + s221 + 2.0 * s021 + s121;
+	//float zMinusOne = s212 + 2.0 * s012 + s112 + 2.0 * s202 + 4.0 * s002 + 2.0 * s102 + s222 + 2.0 * s022 + s122;
 	
-	float g = (zMinusOne + z + zPlusOne) / 64.0;
+	//float z = 2.0 * s210 + 4.0 * s010 + 2.0 * s110 + 4.0 * s200 + 8.0 * s000 + 4.0 * s100 + 2.0 * s220 + 4.0 * s020 + 2.0 * s120;
+
+	//float zPlusOne = s211 + 2.0 * s011 + s111 + 2.0 * s201 + 4.0 * s001 + 2.0 * s101 + s221 + 2.0 * s021 + s121;
+
+	//float g = (zMinusOne + z + zPlusOne) / 64.0;
+
+	//Alternative filter detailed below
+	//	0	1	0		1	2	1		0	1	0
+	//	1	2	1		2	4	2		1	2	1
+	//	0	1	0		1	2	1		0	1	0
+
+	// Variable Naming convention below									z
+	// s212	s012 s112		s210 s010 s110		s211 s011 s111		 ^ /
+	// s202 s002 s102		s200 s000 s100		s201 s001 s101		y|/   
+	// s222 s022 s122		s220 s020 s120		s221 s021 s121		  -->
+	// z - 1					z					z + 1				x
+	
+	float zMinusOne = s012 + s202 + 2.0 * s002 + s102 + s022;
+	
+	float z = s210 + 2.0 * s010 + s110 + 2.0 * s200 + 4.0 * s000 + 2.0 * s100 + s220 + 2.0 * s020 + s120;
+
+	float zPlusOne = s011 + s201 + 2.0 * s001 + s101 + s021;
+	
+	float g = (zMinusOne + z + zPlusOne) / 28.0;
 
 	imageStore(outputTexture, writeLocation, vec4(f, g, 1.0f, 1.0f));
 

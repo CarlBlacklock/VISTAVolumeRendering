@@ -6,6 +6,10 @@ struct Light{
 	vec3 position;
 	vec3 intensity;
 };
+
+subroutine void filterFunction();
+subroutine uniform filterFunction FilterChoice;
+
 uniform sampler3D TextureSampler;
 uniform sampler3D gradientTexture;
 uniform Light myLight;
@@ -18,6 +22,8 @@ uniform float yMaxExtent;
 uniform float zMinExtent;
 uniform float zMaxExtent;
 uniform vec2 mousePosition;
+uniform float alpha;
+uniform float beta;
 
 out vec4 color;
 
@@ -49,7 +55,7 @@ vec3 getSamplePos(vec3 position, int sampleNumber){
 	return position;
 }
 
-void main(void){
+subroutine (filterFunction) void noFilter(){
 	int depth = 256;
 	vec3 stepSizes = 1.0f / Resolution;
 	vec3 viewDir = normalize(ViewingDir);
@@ -134,4 +140,37 @@ void main(void){
 		}
 	}
 	//color = vec4(viewDir, 1.0f);
+}
+subroutine (filterFunction) void sobelGaussFilter(){
+	vec3 stepSizes = 1.0f / Resolution;
+	vec3 viewDir = normalize(ViewingDir);
+	vec3 step = vec3(viewDir.x * stepSizes.x, viewDir.y * stepSizes.y, viewDir.z * stepSizes.z);
+	float xMin = xMinExtent/Resolution.x;
+	float xMax = xMaxExtent/Resolution.x;
+	float yMin = yMinExtent/Resolution.y;
+	float yMax = yMaxExtent/Resolution.y;
+	float zMin = zMinExtent/Resolution.z;
+	float zMax = zMaxExtent/Resolution.z;
+	vec3 currentPos = textureCoords;
+	vec4 currentColor = vec4(0.0, 0.0, 0.0, 0.0);
+	color = vec4(0.0, 0.0, 0.0, 0.0);
+	while(!(currentPos.x < xMin || currentPos.y < yMin || currentPos.z < zMin || currentPos.x > xMax || currentPos.y > yMax || currentPos.z > zMax || color.a >= 1.0f)){
+		vec2 filterValues = texture(TextureSampler, currentPos).rb;
+		//Solve the filter equation: alpha * f(x,y,z) + beta * g(x,y,z)
+		float sampleValue = alpha * filterValues.x + beta * filterValues.y;
+		if(sampleValue >= 0.1){
+			currentColor = vec4(sampleValue,sampleValue,sampleValue, sampleValue);
+			color.rgb = color.rgb + (1 - color.a) * currentColor.a * currentColor.rgb;
+			color.a   = color.a   + (1 - color.a) * currentColor.a;
+		}
+		
+		//if(color.a == 1.0 || currentPos.x < xMin || currentPos.y < yMin || currentPos.z < zMin || currentPos.x > xMax || currentPos.y > yMax || currentPos.z > zMax){
+			//break;
+		//}
+		currentPos += step;
+	}
+	
+}
+void main(void){
+	FilterChoice();
 }

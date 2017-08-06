@@ -114,5 +114,6 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\Resources\triTable.txt" />
+    <Text Include="..\Shaders\alternateSobelGauss.comp" />
   </ItemGroup>
 </Project>

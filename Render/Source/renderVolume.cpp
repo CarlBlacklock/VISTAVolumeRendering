@@ -387,6 +387,7 @@ void renderVolume() {
 	GLuint MovingOrthoMIPProgram = CompileShaders("../Shaders/MovingOrthoMIPVertex.vs", "../Shaders/MovingOrthoMIPFragment.fs");
 	GLuint ComputeShaderProgram = CompileComputeShader("../Shaders/basicCompute.comp");
 	GLuint sobelGaussFilterProgram = CompileComputeShader("../Shaders/sobelGaussFilter.comp");
+	GLuint alternativeSobelGaussProgram = CompileComputeShader("../Shaders/alternateSobelGauss.comp");
 	GLuint ScreenFillingQuadProgram = CompileShaders("../Shaders/test.vs", "../Shaders/test.fs");
 
 	myCube = new DataCube();
@@ -475,8 +476,8 @@ void renderVolume() {
 	int numberOfFrames = 0;
 	char title[512];
 	double currentTime = glfwGetTime();
-	float alpha = 0.5f;
-	float beta = 0.5f;
+	float alpha = 1.0f;
+	float beta = 0.0f;
 	while (!(glfwWindowShouldClose(window) || volumeRenderShouldClose)) {
 
 
@@ -487,7 +488,12 @@ void renderVolume() {
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		if (renderMode == 1) {
-			myCube->DrawDataCubeOrthoView(MovingOrthoRayCastingProgram, volumeID, OrthoMatrix, myCamera->ViewMatrix, myCamera->ViewDir, Resolution, mousePosition, extents, alpha, beta, filterMode);
+			if (filterMode == 0) {
+				myCube->DrawDataCubeOrthoView(MovingOrthoRayCastingProgram, volumeID, OrthoMatrix, myCamera->ViewMatrix, myCamera->ViewDir, Resolution, mousePosition, extents, alpha, beta, filterMode);
+			}
+			else if (filterMode == 1) {
+				myCube->DrawDataCubeOrthoView(MovingOrthoRayCastingProgram, sobelGaussFilterID, OrthoMatrix, myCamera->ViewMatrix, myCamera->ViewDir, Resolution, mousePosition, extents, alpha, beta, filterMode);
+			}
 		}
 		if (renderMode == 0) {
 			glBindFramebuffer(GL_FRAMEBUFFER, fboHandle);
@@ -525,6 +531,7 @@ void renderVolume() {
 	glDeleteProgram(ComputeShaderProgram);
 	glDeleteProgram(MovingPerspectiveRayCastingProgram);
 	glDeleteProgram(sobelGaussFilterProgram);
+	glDeleteProgram(alternativeSobelGaussProgram);
 	glDeleteTextures(1, &volumeID);
 	myCube->CleanUp();
 	myQuad.CleanUp();
