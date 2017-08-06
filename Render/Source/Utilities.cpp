@@ -34,6 +34,37 @@ void calculateGradients(GLuint gradientProgram, int xResolution, int yResolution
 
 }
 
+void sobelGaussFilter(GLuint sobelGaussFilterProgram, int xResolution, int yResolution, int numberOfFiles, GLuint* sobelGaussID) {
+	std::cout << "Applying Sobel Gauss Filter" << std::endl;
+	glGenTextures(1, sobelGaussID);
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_3D, *sobelGaussID);
+	glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA32F, xResolution, yResolution, numberOfFiles, 0, GL_RGBA, GL_FLOAT, NULL);
+
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
+
+	glBindImageTexture(1, *sobelGaussID, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+
+	glUseProgram(sobelGaussFilterProgram);
+
+	GLint readLocation, writeLocation;
+	readLocation = glGetUniformLocation(sobelGaussFilterProgram, "TextureSampler");
+	glUniform1i(readLocation, 0);
+	writeLocation = glGetUniformLocation(sobelGaussFilterProgram, "outputTexture");
+	glUniform1i(writeLocation, 1);
+
+	glDispatchCompute(xResolution, yResolution, numberOfFiles);
+
+	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+	glBindImageTexture(1, 0, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+	glFinish();
+	std::cout << "Sobel Gauss Filter Applied" << std::endl;
+}
+
 
 const GLint triTable[256][16] =
 { { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },

@@ -1,0 +1,124 @@
+#version 430
+
+uniform sampler3D TextureSampler;
+layout(rgba32f, binding = 1) uniform image3D outputTexture;
+uniform vec3 Resolution;
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main(void){
+
+	//Computes the following sum: alpha(f(x,y,z)) + beta(g(x,y,z))
+	//Where alpha and beta are independant scaling values and f(x,y,z) and g(x,y,z) are the 3D Sobel operator and a 3D Gaussian filter respectively
+	ivec3 writeLocation = ivec3(gl_GlobalInvocationID.xyz);
+	ivec3 readLocation = ivec3(gl_GlobalInvocationID.x, gl_GlobalInvocationID.y, gl_GlobalInvocationID.z);
+	// Sobel Operator detailed below
+	// -1	-2	-1		0	0	0		1	2	1
+	// -2	-4	-2		0	0	0		2	4	2
+	// -1	-2	-1		0	0	0		1	2	1
+	//		z-1				z				z+1
+	//
+	// 1	2	1		2	4	2		1	2	1
+	// 0	0	0		0	0	0		0	0	0
+	// -1	-2	-1		-2	-4	-2		-1	-2	-1
+	//		y-1				y				y+1
+	//
+	// -1	0	1		-2	0	2		-1	0	1	
+	// -2	0	2		-4	0	4		-2	0	2
+	// -1	0	-1		-2	0	2		-1	0	1
+	//		x-1				x				x+1
+	//
+	//
+	// Variable Naming convention below
+	// s212	s012 s112		s210 s010 s110		s211 s011 s111		 ^
+	// s202 s002 s102		s200 s000 s100		s201 s001 s101		y|   
+	// s222 s022 s122		s220 s020 s120		s221 s021 s121		  -->
+	// z - 1					z					z + 1				x
+	//	For the Purposes of Variable naming a 2 represents a value of -1
+	
+	float s000 = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(0,0,0)).r;
+	float s001 = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(0,0,1)).r;
+	float s002 = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(0,0,-1)).r;
+	float s010 = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(0,1,0)).r;
+	float s011 = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(0,1,1)).r;
+	float s012 = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(0,1,-1)).r;
+	float s020 = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(0,-1,0)).r;
+	float s021 = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(0,-1,1)).r;
+	float s022 = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(0,-1,-1)).r;
+	float s100 = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(1,0,0)).r;
+	float s101 = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(1,0,1)).r;
+	float s102 = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(1,0,-1)).r;
+	float s110 = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(1,1,0)).r;
+	float s111 = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(1,1,1)).r;
+	float s112 = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(1,1,-1)).r;
+	float s120 = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(1,-1,0)).r;
+	float s121 = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(1,-1,1)).r;
+	float s122 = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(1,-1,-1)).r;
+	float s200 = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(-1,0,0)).r;
+	float s201 = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(-1,0,1)).r;
+	float s202 = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(-1,0,-1)).r;
+	float s210 = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(-1,1,0)).r;
+	float s211 = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(-1,1,1)).r;
+	float s212 = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(-1,1,-1)).r;
+	float s220 = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(-1,-1,0)).r;
+	float s221 = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(-1,-1,1)).r;
+	float s222 = texelFetchOffset(TextureSampler, readLocation, 0, ivec3(-1,-1,-1)).r;
+
+	// Sobel Operator detailed below
+	// -1	-2	-1		0	0	0		1	2	1
+	// -2	-4	-2		0	0	0		2	4	2
+	// -1	-2	-1		0	0	0		1	2	1
+	//		z-1				z				z+1
+	//
+	// 1	2	1		2	4	2		1	2	1
+	// 0	0	0		0	0	0		0	0	0
+	// -1	-2	-1		-2	-4	-2		-1	-2	-1
+	//		y-1				y				y+1
+	//
+	// -1	0	1		-2	0	2		-1	0	1	
+	// -2	0	2		-4	0	4		-2	0	2
+	// -1	0	1		-2	0	2		-1	0	1
+	//		x-1				x				x+1
+	//
+	//
+	// Variable Naming convention below									z
+	// s212	s012 s112		s210 s010 s110		s211 s011 s111		 ^ /
+	// s202 s002 s102		s200 s000 s100		s201 s001 s101		y|/   
+	// s222 s022 s122		s220 s020 s120		s221 s021 s121		  -->
+	// z - 1					z					z + 1				x
+
+
+	float dZMinusOne = -s212 - 2.0 * s012 - s112 - 2.0 * s202 - 4.0 * s002 - 2.0 * s102 - s222 - 2.0 * s022 - s122;
+	float dZPlusOne = s211 + 2.0 * s011 + s111 + 2.0 * s201 + 4.0 * s001 + 2.0 * s101 + s221 + 2.0 * s021 + s121;
+	float dfdz = (dZMinusOne / 16.0) + (dZPlusOne / 16.0);
+	
+	float dYMinusOne =  -s222 - 2.0 * s022 - s122 + s212 + 2.0 * s012 + s112;
+	float dY = -2.0 * s220 - 4.0 * s020 - 2.0 * s120 + 2.0 * s210 + 4.0 * s010 + 2.0 * s110;
+	float dYPlusOne =  -s221 - 2.0 * s021 -s121 + s211 + 2.0 * s011 + s111;
+	float dfdy = (dYPlusOne / 8.0) + (dY / 16.0) + (dYMinusOne / 8.0);
+	
+	float dXMinusOne = -s212 - 2.0 * s202 -s222 + s112 + 2.0 * s102 + s122;
+	float dX = -2.0 * s210 - 4.0 * s200 - 2.0 * s220 + 2.0 * s110 + 4.0 * s100 + 2.0 * s120;
+	float dXPlusOne = -s211 - 2.0 * s201 - s221 + s111 + 2.0 * s101 + s121;
+	float dfdx = (dXMinusOne / 8.0) + (dX / 16.0) + (dXPlusOne / 8.0);
+	
+	float f = length(vec3(dfdx, dfdy, dfdz));
+
+	//Now we apply the Gaussian filter. Filter detailed below
+	//	1	2	1		2	4	2		1	2	1
+	//	2	4	2		4	8	4		2	4	2
+	//	1	2	1		2	4	2		1	2	1
+	//		z-1				z				z+1
+	
+	float zMinusOne = s212 + 2.0 * s012 + s112 + 2.0 * s202 + 4.0 * s002 + 2.0 * s102 + s222 + 2.0 * s022 + s122;
+	
+	float z = 2.0 * s210 + 4.0 * s010 + 2.0 * s110 + 4.0 * s200 + 8.0 * s000 + 4.0 * s100 + 2.0 * s220 + 4.0 * s020 + 2.0 * s120;
+
+	float zPlusOne = s211 + 2.0 * s011 + s111 + 2.0 * s201 + 4.0 * s001 + 2.0 * s101 + s221 + 2.0 * s021 + s121;
+	
+	float g = (zMinusOne + z + zPlusOne) / 64.0;
+
+	imageStore(outputTexture, writeLocation, vec4(f, g, 1.0f, 1.0f));
+
+
+	
+
+}

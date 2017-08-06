@@ -350,7 +350,7 @@ void Histogram::ChangeFocus(glm::vec3 focus, GLuint histoProgram, unsigned char*
 		*/
 		int rangeFit = 0;
 		int k, j;
-		std::cout << "X pos: " << intFocus.x << " Y pos: " << intFocus.y << " Z pos: " << intFocus.z << std::endl;
+		//std::cout << "X pos: " << intFocus.x << " Y pos: " << intFocus.y << " Z pos: " << intFocus.z << std::endl;
 		for (i = -5; i < 6; i++) {
 			for (k = -5; k < 6; k++) {
 				for (j = -5; j < 6; j++) {
@@ -359,7 +359,8 @@ void Histogram::ChangeFocus(glm::vec3 focus, GLuint histoProgram, unsigned char*
 
 					}
 					else {
-						int sampleValue = (int)volumeData[intFocus.x + i + 256 * (intFocus.y + k + 225 * intFocus.z + j)];
+						int samplePoint = std::max(intFocus.x + i,0) + 255 * (std::max(intFocus.y + k,0) + 224 * std::max(intFocus.z + j, 0));
+						int sampleValue = (int)volumeData[samplePoint];
 						if (sampleValue > 0) {
 							rangeFit = sampleValue / upperBound;
 							if (rangeFit == totalSubdivisions) {

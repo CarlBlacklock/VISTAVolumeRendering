@@ -170,9 +170,10 @@ void DataCube::DrawDataCube(GLuint program, GLuint volumeData) {
 
 }
 
-void DataCube::DrawDataCubeOrthoView(GLuint program, GLuint volumeData, GLuint gradientID, glm::mat4 OrthoMatrix, glm::mat4 ViewMatrix, glm::vec3 ViewingDir, glm::vec3 Resolution, glm::vec2 mousePosition, Light aLight, float *extents){
+void DataCube::DrawDataCubeOrthoView(GLuint program, GLuint volumeData, glm::mat4 OrthoMatrix, glm::mat4 ViewMatrix, glm::vec3 ViewingDir, glm::vec3 Resolution, glm::vec2 mousePosition, float *extents, float alpha, float beta, int filterMode){
 	GLint textureLocation, orthoLocation, viewLocation, viewingDirLocation, resolutionLocation, gradientLocation, lightLocation, modelLocation, extentLocation;
-	GLint mousePosLocation;
+	GLint mousePosLocation, alphaLocation, betaLocation;
+	GLuint filterUniform;
 	glUseProgram(program);
 	glBindVertexArray(VAO);
 
@@ -181,12 +182,6 @@ void DataCube::DrawDataCubeOrthoView(GLuint program, GLuint volumeData, GLuint g
 
 	gradientLocation = glGetUniformLocation(program, "gradientTexture");
 	glUniform1i(gradientLocation, 1);
-
-	lightLocation = glGetUniformLocation(program, "myLight.intensity");
-	glUniform3fv(lightLocation, 1, glm::value_ptr(aLight.intensity));
-
-	lightLocation = glGetUniformLocation(program, "myLight.position");
-	glUniform3fv(lightLocation, 1, glm::value_ptr(aLight.position));
 
 	modelLocation = glGetUniformLocation(program, "ModelMatrix");
 	orthoLocation = glGetUniformLocation(program, "OrthoMatrix");
@@ -215,6 +210,21 @@ void DataCube::DrawDataCubeOrthoView(GLuint program, GLuint volumeData, GLuint g
 	mousePosLocation = glGetUniformLocation(program, "mousePosition");
 	glUniform2fv(mousePosLocation, 1, glm::value_ptr(mousePosition));
 
+	alphaLocation = glGetUniformLocation(program, "alpha");
+	glUniform1f(alphaLocation, alpha);
+
+	betaLocation = glGetUniformLocation(program, "beta");
+	glUniform1f(betaLocation, beta);
+
+	if (filterMode == 0) {
+		filterUniform = glGetSubroutineIndex(program, GL_FRAGMENT_SHADER, "noFilter");
+		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &filterUniform);
+	}
+	else if (filterMode == 1) {
+		filterUniform = glGetSubroutineIndex(program, GL_FRAGMENT_SHADER, "sobelGaussFilter");
+		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &filterUniform);
+	}
+
 	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(ViewMatrix));
 	glUniformMatrix4fv(orthoLocation, 1, GL_FALSE, glm::value_ptr(OrthoMatrix));
 	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(ModelMatrix));
@@ -223,8 +233,6 @@ void DataCube::DrawDataCubeOrthoView(GLuint program, GLuint volumeData, GLuint g
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_3D, volumeData);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_3D, gradientID);
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
 	glBindVertexArray(0);

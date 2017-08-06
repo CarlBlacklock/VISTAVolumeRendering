@@ -53,7 +53,7 @@ void renderGlobalHistogram(int numberOfSubdivisions) {
 	GLuint HistogramProgram = CompileShaders("../Shaders/globalHistogram.vs", "../Shaders/globalHistogram.fs");
 	//GLuint TestProgram = CompileShaders("../Shaders/test.vs", "../Shaders/global/Histogram.fs");
 
-	glm::mat4 OrthoMatrix = glm::ortho(0.0f, 1.5f, 0.0f, 1.0f);
+	glm::mat4 OrthoMatrix = glm::ortho(0.0f, 1.0f, 0.0f, 1.0f);
 
 	statusMutex.lock();
 	status++;

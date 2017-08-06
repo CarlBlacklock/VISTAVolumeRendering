@@ -21,6 +21,10 @@ extern glm::vec3 focus;
 extern std::mutex focusLock;
 extern bool focusChanged;
 
+extern glm::vec3 probeFocus;
+extern std::mutex probeFocusLock;
+extern bool probeFocusChanged;
+
 const GLint WIDTH = 640, HEIGHT = 480;
 GLFWwindow *window;
 //Identity Matrix used to simplify glm operations
@@ -41,6 +45,7 @@ bool fboTexturesGenerated = false;
 DataCube* myCube;
 int xMinState, xMaxState, yMinState, yMaxState, zMinState, zMaxState;
 int renderMode = 0;
+int filterMode = 0;
 Camera* myCamera;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -58,7 +63,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
 
 			glBindTexture(GL_TEXTURE_2D, posTex);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_FLOAT, NULL);
 		}
 	}
 }
@@ -73,6 +78,17 @@ static void cursor_position_callback(GLFWwindow* window, double xpos, double ypo
 		focus = glm::vec3(cursorVolumePosition[0], cursorVolumePosition[1], cursorVolumePosition[2]);
 		//focusChanged = true;
 		focusLock.unlock();
+		//std::cout << "X pos: " << std::setprecision(15) << cursorVolumePosition[0] << " Y pos: " << cursorVolumePosition[1] << " Z pos: " << cursorVolumePosition[2];
+	}
+	if (fboTexturesGenerated && renderMode == 0 && probeFocusLock.try_lock()) {
+		glBindFramebuffer(GL_FRAMEBUFFER, fboHandle);
+		glReadBuffer(GL_COLOR_ATTACHMENT1);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		glReadPixels((GLint)xpos, (GLint)ypos, 1, 1, GL_RGB, GL_FLOAT, cursorVolumePosition);
+		//focus = glm::vec3(cursorVolumePosition[0], cursorVolumePosition[1], cursorVolumePosition[2]);
+		probeFocus = glm::vec3(cursorVolumePosition[0], cursorVolumePosition[1], cursorVolumePosition[2]);
+		probeFocusChanged = true;
+		probeFocusLock.unlock();
 		//std::cout << "X pos: " << std::setprecision(15) << cursorVolumePosition[0] << " Y pos: " << cursorVolumePosition[1] << " Z pos: " << cursorVolumePosition[2];
 	}
 }
@@ -104,15 +120,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	if (action == GLFW_PRESS)
 	{
 		switch (key) {
-		case GLFW_KEY_Z:
-			if (animate) {
-				animate = 0;
-			}
-			else {
-				animate = 1;
-				animateStart = glfwGetTime();
-			}
-			break;
+		
 		case GLFW_KEY_Q:
 			//Increase the max x extent
 			if (extents[1] == (float)xResolution) {
@@ -270,6 +278,14 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 			renderMode = 1;
 			break;
 
+		case GLFW_KEY_Z:
+			filterMode = 0;
+			break;
+
+		case GLFW_KEY_X:
+			filterMode = 1;
+			break;
+
 		case GLFW_KEY_P:
 			extents[0] = 0.0f;
 			extents[1] = (float)xResolution;
@@ -370,6 +386,7 @@ void renderVolume() {
 	GLuint MovingPerspectiveRayCastingProgram = CompileShaders("../Shaders/MovingPerspectiveRayCastingVertex.vs", "../Shaders/MovingPerspectiveRayCastingFragment.fs");
 	GLuint MovingOrthoMIPProgram = CompileShaders("../Shaders/MovingOrthoMIPVertex.vs", "../Shaders/MovingOrthoMIPFragment.fs");
 	GLuint ComputeShaderProgram = CompileComputeShader("../Shaders/basicCompute.comp");
+	GLuint sobelGaussFilterProgram = CompileComputeShader("../Shaders/sobelGaussFilter.comp");
 	GLuint ScreenFillingQuadProgram = CompileShaders("../Shaders/test.vs", "../Shaders/test.fs");
 
 	myCube = new DataCube();
@@ -398,6 +415,9 @@ void renderVolume() {
 
 	GLuint gradientID;
 	calculateGradients(ComputeShaderProgram, xResolution, yResolution, numberOfFiles, &gradientID);
+
+	GLuint sobelGaussFilterID;
+	sobelGaussFilter(sobelGaussFilterProgram, xResolution, yResolution, numberOfFiles, &sobelGaussFilterID);
 
 	viewingDir = glm::vec3(0.0, 0.0, 0.0) - myCamera->LookFrom;
 	viewingDir = glm::normalize(viewingDir);
@@ -455,35 +475,30 @@ void renderVolume() {
 	int numberOfFrames = 0;
 	char title[512];
 	double currentTime = glfwGetTime();
+	float alpha = 0.5f;
+	float beta = 0.5f;
 	while (!(glfwWindowShouldClose(window) || volumeRenderShouldClose)) {
 
 
 		glfwPollEvents();
-		/*
-		if (animate) {
-		theta = theta + (glfwGetTime() - animateStart) * 0.1;
-		LookFrom = glm::vec3((float)cos(theta), 0.0f, (float)sin(theta));
-		myLight.position = glm::vec3((float)cos(theta - 0.785398f), 0.0f, (float)sin(theta - 0.785398f));
-		ViewMatrix = glm::lookAt(LookFrom, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
-		viewingDir = glm::vec3(0.0, 0.0, 0.0) - LookFrom;
-		viewingDir = glm::normalize(viewingDir);
-		animateStart = glfwGetTime();
-		}
-		*/
 
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClearDepth(1.0f);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		if (renderMode == 1) {
-			myCube->DrawDataCubeOrthoView(MovingOrthoRayCastingProgram, volumeID, OrthoMatrix, myCamera->ViewMatrix, myCamera->ViewDir, Resolution, mousePosition, extents);
+			myCube->DrawDataCubeOrthoView(MovingOrthoRayCastingProgram, volumeID, OrthoMatrix, myCamera->ViewMatrix, myCamera->ViewDir, Resolution, mousePosition, extents, alpha, beta, filterMode);
 		}
 		if (renderMode == 0) {
 			glBindFramebuffer(GL_FRAMEBUFFER, fboHandle);
 			glDrawBuffers(2, drawBuffers);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			myCube->DrawDataCubeOrthoView(MovingOrthoMIPProgram, volumeID, OrthoMatrix, myCamera->ViewMatrix, myCamera->ViewDir, Resolution, mousePosition, extents);
+			if (filterMode == 0) {
+				myCube->DrawDataCubeOrthoView(MovingOrthoMIPProgram, volumeID, OrthoMatrix, myCamera->ViewMatrix, myCamera->ViewDir, Resolution, mousePosition, extents, alpha, beta, filterMode);
+			}
+			else if (filterMode == 1) {
+				myCube->DrawDataCubeOrthoView(MovingOrthoMIPProgram, sobelGaussFilterID, OrthoMatrix, myCamera->ViewMatrix, myCamera->ViewDir, Resolution, mousePosition, extents, alpha, beta, filterMode);
+			}
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			
 			myQuad.DrawScreenFillingQuad(ScreenFillingQuadProgram, OrthoMatrix, myCamera->ViewMatrix, colorTex);
@@ -509,12 +524,14 @@ void renderVolume() {
 	glDeleteProgram(MovingOrthoMIPProgram);
 	glDeleteProgram(ComputeShaderProgram);
 	glDeleteProgram(MovingPerspectiveRayCastingProgram);
+	glDeleteProgram(sobelGaussFilterProgram);
 	glDeleteTextures(1, &volumeID);
 	myCube->CleanUp();
 	myQuad.CleanUp();
 	glDeleteProgram(ScreenFillingQuadProgram);
 	glDeleteTextures(1, &colorTex);
 	glDeleteTextures(1, &posTex);
+	glDeleteTextures(1, &sobelGaussFilterID);
 	glDeleteRenderbuffers(1, &depthTex);
 	glDeleteFramebuffers(1, &fboHandle);
 	glDeleteTextures(1, &gradientID);
