@@ -2,6 +2,9 @@
 
 in vec3 textureCoords;
 
+subroutine void filterFunction();
+subroutine uniform filterFunction FilterChoice;
+
 uniform sampler3D TextureSampler;
 uniform vec3 ViewingDir;
 uniform vec3 Resolution;
@@ -11,12 +14,15 @@ uniform float yMinExtent;
 uniform float yMaxExtent;
 uniform float zMinExtent;
 uniform float zMaxExtent;
+uniform float alpha;
+uniform float beta;
 
 layout(location = 0) out vec4 color;
 layout(location = 1) out vec3 position;
 
-void main(void){
-	int depth = 256;
+
+subroutine (filterFunction) void noFilter(){
+	//Choosen when there is no desire to filter the input image
 	vec3 stepSizes = 1.0f / Resolution;
 	vec3 viewDir = normalize(ViewingDir);
 	vec3 step = vec3(viewDir.x * stepSizes.x, viewDir.y * stepSizes.y, viewDir.z * stepSizes.z);
@@ -26,20 +32,56 @@ void main(void){
 	float yMax = yMaxExtent/Resolution.y;
 	float zMin = zMinExtent/Resolution.z;
 	float zMax = zMaxExtent/Resolution.z;
-	vec4 currentColor;
 	vec3 currentPos = textureCoords;
 	color = vec4(0.0, 0.0, 0.0, 0.0);
-	for(int i = 0; i < depth; i++){
+	while(!(currentPos.x < xMin || currentPos.y < yMin || currentPos.z < zMin || currentPos.x > xMax || currentPos.y > yMax || currentPos.z > zMax)){
 		float sampleValue = texture(TextureSampler, currentPos).r;
 		if(sampleValue >= 0.1){
-			currentColor = vec4(sampleValue, sampleValue, sampleValue, sampleValue);
-			color = max(color, currentColor);
+			if(sampleValue > color.r){
+				color = vec4(sampleValue, sampleValue, sampleValue, sampleValue);
+				position = currentPos;
+			}
 		}
-		if(color.a == 1.0 || currentPos.x < xMin || currentPos.y < yMin || currentPos.z < zMin || currentPos.x > xMax || currentPos.y > yMax || currentPos.z > zMax){
-			break;
-		}
+		
+		//if(color.a == 1.0 || currentPos.x < xMin || currentPos.y < yMin || currentPos.z < zMin || currentPos.x > xMax || currentPos.y > yMax || currentPos.z > zMax){
+			//break;
+		//}
 		currentPos += step;
 	}
-	position = currentPos;
+	
+}
 
+subroutine (filterFunction) void sobelGaussFilter(){
+	vec3 stepSizes = 1.0f / Resolution;
+	vec3 viewDir = normalize(ViewingDir);
+	vec3 step = vec3(viewDir.x * stepSizes.x, viewDir.y * stepSizes.y, viewDir.z * stepSizes.z);
+	float xMin = xMinExtent/Resolution.x;
+	float xMax = xMaxExtent/Resolution.x;
+	float yMin = yMinExtent/Resolution.y;
+	float yMax = yMaxExtent/Resolution.y;
+	float zMin = zMinExtent/Resolution.z;
+	float zMax = zMaxExtent/Resolution.z;
+	vec3 currentPos = textureCoords;
+	color = vec4(0.0, 0.0, 0.0, 0.0);
+	while(!(currentPos.x < xMin || currentPos.y < yMin || currentPos.z < zMin || currentPos.x > xMax || currentPos.y > yMax || currentPos.z > zMax)){
+		vec2 filterValues = texture(TextureSampler, currentPos).rb;
+		//Solve the filter equation: alpha * f(x,y,z) + beta * g(x,y,z)
+		float sampleValue = alpha * filterValues.x + beta * filterValues.y;
+		if(sampleValue >= 0.1){
+			if(sampleValue > color.r){
+				color = vec4(sampleValue, sampleValue, sampleValue, sampleValue);
+				position = currentPos;
+			}
+		}
+		
+		//if(color.a == 1.0 || currentPos.x < xMin || currentPos.y < yMin || currentPos.z < zMin || currentPos.x > xMax || currentPos.y > yMax || currentPos.z > zMax){
+			//break;
+		//}
+		currentPos += step;
+	}
+	
+}
+
+void main(void){
+	FilterChoice();
 }

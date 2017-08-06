@@ -52,7 +52,7 @@ void renderLocalHistogram(int numberOfSubdivisions) {
 	Histogram local = Histogram(focus, numberOfSubdivisions, volumeData, xResolution, yResolution, numberOfFiles, HistogramProgram);
 	focusLock.unlock();
 
-	glm::mat4 OrthoMatrix = glm::ortho(0.0f, 1.5f, 0.0f, 1.0f);
+	glm::mat4 OrthoMatrix = glm::ortho(0.0f, 1.0f, 0.0f, 1.0f);
 
 	while (!(glfwWindowShouldClose(localHistogramWindow) || localHistoShouldClose)) {
 		glfwPollEvents();

@@ -6,6 +6,7 @@
 #include <cstring>
 #include <string>
 #include <mutex>
+#include <algorithm>
 #define degreesToRadians(x) x*(3.141592f/180.0f)
 typedef struct Vertex {
 	GLfloat position[3];

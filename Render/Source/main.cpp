@@ -13,18 +13,20 @@ int status = 0;
 
 bool globalHistoClosed = false;
 bool localHistoClosed = false;
+bool probeHistoClosed = false;
 
 extern bool globalHistoShouldClose;
 bool volumeRenderClosed = false;
 extern bool volumeRenderShouldClose;
 extern bool GLEWINIT;
 extern bool localHistoShouldClose;
+extern bool probeHistoShouldClose;
 
 
 
 int main() {
 	int i; 
-	int numberOfSubdivisions = 10;
+	int numberOfSubdivisions = 20;
 	if (!glfwInit()) {
 		std::cout << "Failed to initialize glfw" << std::endl;
 	}
@@ -47,6 +49,7 @@ int main() {
 	
 	std::thread globalHistoRender(renderGlobalHistogram, numberOfSubdivisions);
 	std::thread localHistoRender(renderLocalHistogram, numberOfSubdivisions);
+	std::thread probeHistorRender(renderProbeHistogram, numberOfSubdivisions);
 	while (status < 2 && !(globalHistoClosed || volumeRenderClosed)) {
 		//Wait until all threads are finished using the volume data
 	}
@@ -77,9 +80,13 @@ int main() {
 		//Send the signal to end
 		std::cout << "histogram Closed" << std::endl;
 		volumeRenderShouldClose = true;
+		localHistoShouldClose = true;
+		probeHistoShouldClose = true;
 	}
 	else if (volumeRenderClosed) {
 		globalHistoShouldClose = true;
+		localHistoShouldClose = true;
+		probeHistoShouldClose = true;
 	}
 	std::cout << "About to close" << std::endl;
 	//std::cin >> i;
@@ -89,6 +96,7 @@ int main() {
 	globalHistoRender.join();
 	volumeRender.join();
 	localHistoRender.join();
+	probeHistorRender.join();
 
 	free(volumeData);
 	std::cout << "Volume Data released" << std::endl;
