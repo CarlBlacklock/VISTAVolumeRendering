@@ -1,10 +1,1 @@
-﻿  renderVolume.cpp
-d:\github\vistavolumerendering\render\source\rendervolume.cpp(311): warning C4305: 'argument': truncation from 'double' to 'float'
-d:\github\vistavolumerendering\render\source\rendervolume.cpp(314): warning C4305: 'argument': truncation from 'double' to 'float'
-d:\github\vistavolumerendering\render\source\rendervolume.cpp(317): warning C4305: 'argument': truncation from 'double' to 'float'
-d:\github\vistavolumerendering\render\source\rendervolume.cpp(320): warning C4305: 'argument': truncation from 'double' to 'float'
-d:\github\vistavolumerendering\render\source\rendervolume.cpp(331): warning C4101: 'i': unreferenced local variable
-  main.cpp
-  Generating Code...
-  Render.vcxproj -> D:\Github\VISTAVolumeRendering\Render\Debug\Render.exe
-  Render.vcxproj -> D:\Github\VISTAVolumeRendering\Render\Debug\Render.pdb (Partial PDB)
+﻿
