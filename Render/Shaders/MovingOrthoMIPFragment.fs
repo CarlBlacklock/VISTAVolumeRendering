@@ -64,7 +64,7 @@ subroutine (filterFunction) void sobelGaussFilter(){
 	vec3 currentPos = textureCoords;
 	color = vec4(0.0, 0.0, 0.0, 0.0);
 	while(!(currentPos.x < xMin || currentPos.y < yMin || currentPos.z < zMin || currentPos.x > xMax || currentPos.y > yMax || currentPos.z > zMax)){
-		vec2 filterValues = texture(TextureSampler, currentPos).rb;
+		vec2 filterValues = texture(TextureSampler, currentPos).rg;
 		//Solve the filter equation: alpha * f(x,y,z) + beta * g(x,y,z)
 		float sampleValue = alpha * filterValues.x + beta * filterValues.y;
 		if(sampleValue >= 0.1){

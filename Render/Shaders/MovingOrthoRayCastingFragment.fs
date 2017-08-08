@@ -97,9 +97,9 @@ subroutine (filterFunction) void noFilter(){
 			while(keepWorkingOnCurrentSample){
 				float sampleValue = texture(TextureSampler, currentPos).r;
 				//Attempt to use the gradient magnitude as a method of detecting contours
-				gradient = vec3(texture(gradientTexture, currentPos).rgb);
+				//gradient = vec3(texture(gradientTexture, currentPos).rgb);
 				//Calculate gradient magnitude
-				gradientMagnitude = length(gradient);
+				//gradientMagnitude = length(gradient);
 				//if(gradientMagnitude > 419.0f){
 					currentColor = vec4(sampleValue,sampleValue,sampleValue, sampleValue);
 					fragmentSampleColor.rgb = fragmentSampleColor.rgb + (1 - fragmentSampleColor.a) * currentColor.a * currentColor.rgb;
@@ -124,9 +124,9 @@ subroutine (filterFunction) void noFilter(){
 		while(continueRendering){
 			float sampleValue = texture(TextureSampler, currentPos).r;
 			//Attempt to use the gradient magnitude as a method of detecting contours
-			gradient = vec3(texture(gradientTexture, currentPos).rgb);
+			//gradient = vec3(texture(gradientTexture, currentPos).rgb);
 			//Calculate gradient magnitude
-			gradientMagnitude = length(gradient);
+			//gradientMagnitude = length(gradient);
 			//if(gradientMagnitude > 419.0f){
 				currentColor = vec4(sampleValue,sampleValue,sampleValue, sampleValue);
 				color.rgb = color.rgb + (1 - color.a) * currentColor.a * currentColor.rgb;
@@ -155,7 +155,7 @@ subroutine (filterFunction) void sobelGaussFilter(){
 	vec4 currentColor = vec4(0.0, 0.0, 0.0, 0.0);
 	color = vec4(0.0, 0.0, 0.0, 0.0);
 	while(!(currentPos.x < xMin || currentPos.y < yMin || currentPos.z < zMin || currentPos.x > xMax || currentPos.y > yMax || currentPos.z > zMax || color.a >= 1.0f)){
-		vec2 filterValues = texture(TextureSampler, currentPos).rb;
+		vec2 filterValues = texture(TextureSampler, currentPos).rg;
 		//Solve the filter equation: alpha * f(x,y,z) + beta * g(x,y,z)
 		float sampleValue = alpha * filterValues.x + beta * filterValues.y;
 		if(sampleValue >= 0.1){

@@ -91,13 +91,13 @@ int main() {
 	std::cout << "About to close" << std::endl;
 	//std::cin >> i;
 	//marchCubes(0.2f, &numberOfVerticesCalculated, &placeholderVAO, xResolution, yResolution, numberOfFiles);
-	glfwTerminate();
+	
 
 	globalHistoRender.join();
 	volumeRender.join();
 	localHistoRender.join();
 	probeHistorRender.join();
-
+	glfwTerminate();
 	free(volumeData);
 	std::cout << "Volume Data released" << std::endl;
 	return EXIT_SUCCESS;

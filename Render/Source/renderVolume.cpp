@@ -476,8 +476,8 @@ void renderVolume() {
 	int numberOfFrames = 0;
 	char title[512];
 	double currentTime = glfwGetTime();
-	float alpha = 1.0f;
-	float beta = 0.0f;
+	float alpha = 0.50f;
+	float beta = 0.50f;
 	while (!(glfwWindowShouldClose(window) || volumeRenderShouldClose)) {
 
 

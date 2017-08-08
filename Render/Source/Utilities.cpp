@@ -39,7 +39,7 @@ void sobelGaussFilter(GLuint sobelGaussFilterProgram, int xResolution, int yReso
 	glGenTextures(1, sobelGaussID);
 	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_3D, *sobelGaussID);
-	glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA32F, xResolution, yResolution, numberOfFiles, 0, GL_RGBA, GL_FLOAT, NULL);
+	glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA8, xResolution, yResolution, numberOfFiles, 0, GL_RGBA, GL_FLOAT, NULL);
 
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -47,7 +47,7 @@ void sobelGaussFilter(GLuint sobelGaussFilterProgram, int xResolution, int yReso
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
 
-	glBindImageTexture(1, *sobelGaussID, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+	glBindImageTexture(1, *sobelGaussID, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA8);
 
 	glUseProgram(sobelGaussFilterProgram);
 

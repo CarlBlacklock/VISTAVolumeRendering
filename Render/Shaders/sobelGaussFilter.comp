@@ -1,7 +1,7 @@
 #version 430
 
 uniform sampler3D TextureSampler;
-layout(rgba32f, binding = 1) uniform image3D outputTexture;
+layout(rgba8, binding = 1) uniform image3D outputTexture;
 uniform vec3 Resolution;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main(void){
@@ -108,13 +108,13 @@ void main(void){
 	//	1	2	1		2	4	2		1	2	1
 	//		z-1				z				z+1
 
-	//float zMinusOne = s212 + 2.0 * s012 + s112 + 2.0 * s202 + 4.0 * s002 + 2.0 * s102 + s222 + 2.0 * s022 + s122;
+	float zMinusOne = s212 + 2.0 * s012 + s112 + 2.0 * s202 + 4.0 * s002 + 2.0 * s102 + s222 + 2.0 * s022 + s122;
 	
-	//float z = 2.0 * s210 + 4.0 * s010 + 2.0 * s110 + 4.0 * s200 + 8.0 * s000 + 4.0 * s100 + 2.0 * s220 + 4.0 * s020 + 2.0 * s120;
+	float z = 2.0 * s210 + 4.0 * s010 + 2.0 * s110 + 4.0 * s200 + 8.0 * s000 + 4.0 * s100 + 2.0 * s220 + 4.0 * s020 + 2.0 * s120;
 
-	//float zPlusOne = s211 + 2.0 * s011 + s111 + 2.0 * s201 + 4.0 * s001 + 2.0 * s101 + s221 + 2.0 * s021 + s121;
+	float zPlusOne = s211 + 2.0 * s011 + s111 + 2.0 * s201 + 4.0 * s001 + 2.0 * s101 + s221 + 2.0 * s021 + s121;
 
-	//float g = (zMinusOne + z + zPlusOne) / 64.0;
+	float g = (zMinusOne + z + zPlusOne) / 64.0;
 
 	//Alternative filter detailed below
 	//	0	1	0		1	2	1		0	1	0
@@ -127,13 +127,13 @@ void main(void){
 	// s222 s022 s122		s220 s020 s120		s221 s021 s121		  -->
 	// z - 1					z					z + 1				x
 	
-	float zMinusOne = s012 + s202 + 2.0 * s002 + s102 + s022;
+	//float zMinusOne = s012 + s202 + 2.0 * s002 + s102 + s022;
 	
-	float z = s210 + 2.0 * s010 + s110 + 2.0 * s200 + 4.0 * s000 + 2.0 * s100 + s220 + 2.0 * s020 + s120;
+	//float z = s210 + 2.0 * s010 + s110 + 2.0 * s200 + 4.0 * s000 + 2.0 * s100 + s220 + 2.0 * s020 + s120;
 
-	float zPlusOne = s011 + s201 + 2.0 * s001 + s101 + s021;
+	//float zPlusOne = s011 + s201 + 2.0 * s001 + s101 + s021;
 	
-	float g = (zMinusOne + z + zPlusOne) / 28.0;
+	//float g = (zMinusOne + z + zPlusOne) / 28.0;
 
 	imageStore(outputTexture, writeLocation, vec4(f, g, 1.0f, 1.0f));
 
