@@ -66,6 +66,9 @@
     <ClCompile Include="..\Headers\localProbeWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\VolumeRenderWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Headers\OpenGLincludes.h">
@@ -105,6 +108,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Headers\localProbeWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Headers\VolumeRenderWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

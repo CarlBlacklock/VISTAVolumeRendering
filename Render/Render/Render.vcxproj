@@ -147,6 +147,7 @@
     <ClCompile Include="..\Source\renderVolume.cpp" />
     <ClCompile Include="..\Source\ScreenFillingQuad.cpp" />
     <ClCompile Include="..\Source\Utilities.cpp" />
+    <ClCompile Include="..\Source\VolumeRenderWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Headers\Camera.h" />
@@ -162,6 +163,7 @@
     <ClInclude Include="..\Headers\renderThreads.h" />
     <ClInclude Include="..\Headers\ScreenFillingQuad.h" />
     <ClInclude Include="..\Headers\Utilities.h" />
+    <ClInclude Include="..\Headers\VolumeRenderWindow.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Shaders\basicCompute.comp" />
