@@ -7,6 +7,9 @@
 #include <string>
 #include <mutex>
 #include <algorithm>
+//#include "mat.h"
+//#include "matrix.h"
+
 #define degreesToRadians(x) x*(3.141592f/180.0f)
 typedef struct Vertex {
 	GLfloat position[3];

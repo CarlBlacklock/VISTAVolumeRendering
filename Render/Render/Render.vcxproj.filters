@@ -57,6 +57,15 @@
     <ClCompile Include="..\Source\renderProbeHistogram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\histogramWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\filteredHistogram.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Headers\localProbeWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Headers\OpenGLincludes.h">
@@ -89,6 +98,15 @@
     <ClInclude Include="..\Headers\renderThreads.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\Headers\histogramWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Headers\filteredHistogram.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Headers\localProbeWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Shaders\OrthoRayCastingFragment.fs" />
@@ -111,6 +129,7 @@
     <None Include="..\Shaders\test.fs" />
     <None Include="..\Shaders\localHistogram.comp" />
     <None Include="..\Shaders\sobelGaussFilter.comp" />
+    <None Include="..\Shaders\probeHistogram.comp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\Resources\triTable.txt" />

@@ -15,8 +15,6 @@ extern unsigned char *volumeData;
 extern int xResolution;
 extern int yResolution;
 extern int numberOfFiles;
-extern std::mutex statusMutex;
-extern int status;
 extern glm::vec3 focus;
 extern std::mutex focusLock;
 extern bool focusChanged;
@@ -409,9 +407,7 @@ void renderVolume() {
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
 
-	statusMutex.lock();
-	status++;
-	statusMutex.unlock();
+
 
 
 	GLuint gradientID;
@@ -476,8 +472,8 @@ void renderVolume() {
 	int numberOfFrames = 0;
 	char title[512];
 	double currentTime = glfwGetTime();
-	float alpha = 0.50f;
-	float beta = 0.50f;
+	float alpha = 0.0f;
+	float beta = 1.0f;
 	while (!(glfwWindowShouldClose(window) || volumeRenderShouldClose)) {
 
 

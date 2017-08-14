@@ -14,6 +14,7 @@ extern int xResolution;
 extern int yResolution;
 extern int numberOfFiles;
 extern float cursorVolumePosition[3];
+extern int numberOfSubdivisions;
 
 //Define focus
 glm::vec3 focus;
@@ -24,7 +25,7 @@ void local_histogram_framebuffer_size_callback(GLFWwindow *histogramWindow, int 
 	glViewport(0, 0, width, height);
 }
 
-void renderLocalHistogram(int numberOfSubdivisions) {
+void renderLocalHistogram() {
 	int i;
 	GLFWwindow* localHistogramWindow;
 	localHistogramWindow = CreateWindow(500, 200, "Local Histogram", nullptr, nullptr);

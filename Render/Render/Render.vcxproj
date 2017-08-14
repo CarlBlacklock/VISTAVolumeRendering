@@ -78,8 +78,8 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>..\OpenGL\SOIL\lib;..\OpenGL\glfw\lib-vc2015;..\OpenGL\glew\lib\Release\Win32</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libSOIL.lib;opengl32.lib;glew32s.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\OpenGL\SOIL\lib;..\OpenGL\glfw\lib-vc2015;..\OpenGL\glew\lib\Release\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SOIL64.lib;opengl32.lib;glew32s.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -87,7 +87,13 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>..\OpenGL\SOIL\src;..\OpenGL\glm\glm;..\OpenGL\glfw\include;..\OpenGL\glew\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>..\OpenGL\SOIL\lib;..\OpenGL\glfw\lib-vc2015;..\OpenGL\glew\lib\Release\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SOIL64.lib;opengl32.lib;glew32s.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -102,8 +108,8 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>..\OpenGL\SOIL\lib;..\OpenGL\glfw\lib-vc2015;..\OpenGL\glew\lib\Release\Win32</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libSOIL.lib;opengl32.lib;glew32s.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\OpenGL\SOIL\lib;..\OpenGL\glfw\lib-vc2015;..\OpenGL\glew\lib\Release\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SOIL64.lib;opengl32.lib;glew32s.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -113,18 +119,25 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>..\OpenGL\SOIL\src;..\OpenGL\glm\glm;..\OpenGL\glfw\include;..\OpenGL\glew\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>..\OpenGL\SOIL\lib;..\OpenGL\glfw\lib-vc2015;..\OpenGL\glew\lib\Release\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SOIL64.lib;opengl32.lib;glew32s.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Headers\localProbeWindow.cpp" />
     <ClCompile Include="..\Source\Camera.cpp" />
     <ClCompile Include="..\Source\CompileShaders.cpp" />
     <ClCompile Include="..\Source\CreateWindow.cpp" />
     <ClCompile Include="..\Source\DataCube.cpp" />
+    <ClCompile Include="..\Source\filteredHistogram.cpp" />
     <ClCompile Include="..\Source\Histogram.cpp" />
+    <ClCompile Include="..\Source\histogramWindow.cpp" />
     <ClCompile Include="..\Source\LoadDicom.cpp" />
     <ClCompile Include="..\Source\main.cpp" />
     <ClCompile Include="..\Source\RAWLoader.cpp" />
@@ -138,8 +151,11 @@
   <ItemGroup>
     <ClInclude Include="..\Headers\Camera.h" />
     <ClInclude Include="..\Headers\DataCube.h" />
+    <ClInclude Include="..\Headers\filteredHistogram.h" />
     <ClInclude Include="..\Headers\Histogram.h" />
+    <ClInclude Include="..\Headers\histogramWindow.h" />
     <ClInclude Include="..\Headers\LoadDicom.h" />
+    <ClInclude Include="..\Headers\localProbeWindow.h" />
     <ClInclude Include="..\Headers\RAWLoader.h" />
     <ClInclude Include="..\Headers\Render.h" />
     <ClInclude Include="..\Headers\OpenGLincludes.h" />
@@ -165,6 +181,7 @@
     <None Include="..\Shaders\OrthoMIPVertex.vs" />
     <None Include="..\Shaders\OrthoRayCastingFragment.fs" />
     <None Include="..\Shaders\OrthoRayCastingVertex.vs" />
+    <None Include="..\Shaders\probeHistogram.comp" />
     <None Include="..\Shaders\sobelGaussFilter.comp" />
     <None Include="..\Shaders\test.fs" />
     <None Include="..\Shaders\test.vs" />

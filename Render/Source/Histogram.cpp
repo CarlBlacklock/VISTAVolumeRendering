@@ -2,6 +2,64 @@
 #include "..\Headers\CompileShaders.h"
 
 
+//default constructor
+Histogram::Histogram() {
+
+}
+
+
+Histogram::Histogram(glm::vec3 focus, int numberOfSubdivisions, int xResolution, int yResolution, int numberOfFiles, GLuint histoProgram, GLuint filteredVolume) {
+	totalSubdivisions = numberOfSubdivisions;
+	float barWidth = 1.0f / (float)totalSubdivisions;
+	int i;
+	vertices = (Vertex *)malloc(6 * sizeof(Vertex));
+	if (vertices != NULL) {
+		vertices[0].position[0] = 0.0f;
+		vertices[0].position[1] = 0.0f;
+		vertices[0].position[2] = 0.0f;
+
+		vertices[1].position[0] = 1.0f;
+		vertices[1].position[1] = 0.f;
+		vertices[1].position[2] = 0.0f;
+
+		vertices[2].position[0] = 1.0f;
+		vertices[2].position[1] = 1.0f;
+		vertices[2].position[2] = 0.0f;
+
+		vertices[3].position[0] = 0.0f;
+		vertices[3].position[1] = 0.0f;
+		vertices[3].position[2] = 0.0f;
+
+		vertices[4].position[0] = 1.0f;
+		vertices[4].position[1] = 1.0f;
+		vertices[4].position[2] = 0.0f;
+
+		vertices[5].position[0] = 0.0f;
+		vertices[5].position[1] = 1.0f;
+		vertices[5].position[2] = 0.0f;
+
+		glm::mat4 *modelMatrices;
+		modelMatrices = (glm::mat4 *)malloc(totalSubdivisions * sizeof(glm::mat4));
+		if (modelMatrices != NULL) {
+			glm::mat4 identityMatrix = glm::mat4(1.0f);
+			glm::mat4 scalePart = glm::scale(identityMatrix, glm::vec3(barWidth, 0.0f, 0.0f));
+			glm::mat4 translatePart = glm::translate(identityMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
+			modelMatrices[0] = translatePart * scalePart * identityMatrix;
+			for (i = 1; i < totalSubdivisions; i++) {
+				scalePart = glm::scale(identityMatrix, glm::vec3(barWidth, 0.0f, 0.0f));
+				translatePart = glm::translate(identityMatrix, glm::vec3((float)i * barWidth, 0.0f, 0.0f));
+				modelMatrices[i] = translatePart * scalePart * identityMatrix;
+			}
+			glGenBuffers(2, VBO);
+			glGenVertexArrays(1, &VAO);
+			glBindVertexArray(VAO);
+			glBindBuffer(GL_ARRAY_BUFFER, VBO[0]);
+			glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(glm::vec3), vertices, GL_STATIC_DRAW);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (GLvoid *)0);
+			glEnableVertexAttribArray(0);
+		}
+	}
+}
 
 Histogram::Histogram(int numberOfSubdivisions, unsigned char* volumeData, int xResolution, int yResolution, int numberOfFiles){
 	totalSubdivisions = numberOfSubdivisions;
@@ -75,58 +133,73 @@ Histogram::Histogram(int numberOfSubdivisions, unsigned char* volumeData, int xR
 					modelMatrices[i] = translatePart * scalePart * identityMatrix;
 				}
 
+				/*
+				int *countIndex;
+				countIndex = (int *)malloc(totalSubdivisions * sizeof(int));
+				for (i = 0; i < totalSubdivisions; i++) {
+					countIndex[i] = i;
+				}
+				*/
 				
 
+				glGenBuffers(2, VBO);
+				glGenVertexArrays(1, &VAO);
+				glBindVertexArray(VAO);
+				glBindBuffer(GL_ARRAY_BUFFER, VBO[0]);
+				glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(glm::vec3), vertices, GL_STATIC_DRAW);
+				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (GLvoid *)0);
+				glEnableVertexAttribArray(0);
+				/*
+				glBindBuffer(GL_ARRAY_BUFFER, VBO[2]);
+				glBufferData(GL_ARRAY_BUFFER, totalSubdivisions * sizeof(GLfloat), offsets, GL_STATIC_DRAW);
+				glVertexAttribPointer(0, 1, GL_FLOAT, GL_FALSE, sizeof(GLfloat), (GLvoid *)0);
+				glEnableVertexAttribArray(1);
+				*/
+				glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
+				glBufferData(GL_ARRAY_BUFFER, totalSubdivisions * sizeof(glm::mat4), modelMatrices, GL_STATIC_DRAW);
 
-					glGenBuffers(2, VBO);
-					glGenVertexArrays(1, &VAO);
-					glBindVertexArray(VAO);
-					glBindBuffer(GL_ARRAY_BUFFER, VBO[0]);
-					glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(glm::vec3), vertices, GL_STATIC_DRAW);
-					glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (GLvoid *)0);
-					glEnableVertexAttribArray(0);
-					/*
-					glBindBuffer(GL_ARRAY_BUFFER, VBO[2]);
-					glBufferData(GL_ARRAY_BUFFER, totalSubdivisions * sizeof(GLfloat), offsets, GL_STATIC_DRAW);
-					glVertexAttribPointer(0, 1, GL_FLOAT, GL_FALSE, sizeof(GLfloat), (GLvoid *)0);
-					glEnableVertexAttribArray(1);
-					*/
-					glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
-					glBufferData(GL_ARRAY_BUFFER, totalSubdivisions * sizeof(glm::mat4), modelMatrices, GL_STATIC_DRAW);
+				glEnableVertexAttribArray(1);
+				GLsizei vec4Size = sizeof(glm::vec4);
+				glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (GLvoid *)0);
+				glEnableVertexAttribArray(2);
+				glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (GLvoid *)(vec4Size));
+				glEnableVertexAttribArray(3);
+				glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (GLvoid *)(2 * vec4Size));
+				glEnableVertexAttribArray(4);
+				glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (GLvoid *)(3 * vec4Size));
+				glVertexAttribDivisor(1, 1);
+				glVertexAttribDivisor(2, 1);
+				glVertexAttribDivisor(3, 1);
+				glVertexAttribDivisor(4, 1);
+				//glVertexAttribDivisor(5, 1);
+				/*
+				GLuint secretVBO;
+				glGenBuffers(1, &secretVBO);
+				glBindBuffer(GL_ARRAY_BUFFER, secretVBO);
+				glBufferData(GL_ARRAY_BUFFER, totalSubdivisions * sizeof(int), countIndex, GL_STATIC_DRAW);
 
-					glEnableVertexAttribArray(1);
-					GLsizei vec4Size = sizeof(glm::vec4);
-					glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (GLvoid *)0);
-					glEnableVertexAttribArray(2);
-					glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (GLvoid *)(vec4Size));
-					glEnableVertexAttribArray(3);
-					glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (GLvoid *)(2 * vec4Size));
-					glEnableVertexAttribArray(4);
-					glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (GLvoid *)(3 * vec4Size));
-					glVertexAttribDivisor(1, 1);
-					glVertexAttribDivisor(2, 1);
-					glVertexAttribDivisor(3, 1);
-					glVertexAttribDivisor(4, 1);
-					glVertexAttribDivisor(5, 1);
-					GLenum errorType;
-					while ((errorType = glGetError()) != GL_NO_ERROR) {
+				glEnableVertexAttribArray(5);
+				glVertexAttribPointer(5, 1, GL_INT, GL_FALSE, 0, (GLvoid *)0);
+				glVertexAttribDivisor(5, 1);
+				GLenum errorType;
+				while ((errorType = glGetError()) != GL_NO_ERROR) {
 
-					}
+				}
 
-
-					glBindVertexArray(0);
-					//free(offsets);
-					free(modelMatrices);
-					free(vertices);
-					free(numberOfOccurrances);
-				
+				*/
+				glBindVertexArray(0);
+				//free(offsets);
+				free(modelMatrices);
+				free(vertices);
+				free(numberOfOccurrances);
+				//free(countIndex);
 			}
 		}
 	}
 
 }
 
-Histogram::Histogram(glm::vec3 focus, int numberOfSubdivisions, unsigned char* volumeData, int xResolution, int yResolution, int numberOfFiles, GLuint histoProgram) {
+Histogram::Histogram(glm::vec3 focus, int numberOfSubdivisions, unsigned char* volumeData, int xResolution, int yResolution, int numberOfFiles) {
 	totalSubdivisions = numberOfSubdivisions;
 	xRes = xResolution;
 	yRes = yResolution;
@@ -295,7 +368,7 @@ Histogram::Histogram(glm::vec3 focus, int numberOfSubdivisions, unsigned char* v
 
 
 
-void Histogram::ChangeFocus(glm::vec3 focus, GLuint histoProgram, unsigned char* volumeData) {
+void Histogram::ChangeFocus(glm::vec3 focus, unsigned char* volumeData) {
 	
 	int *numberOfOccurrances;
 	numberOfOccurrances = (int *)malloc(totalSubdivisions * sizeof(int));

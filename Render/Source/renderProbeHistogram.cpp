@@ -1,5 +1,5 @@
 #include "..\Headers\renderThreads.h"
-
+#include "..\Headers\Utilities.h"
 #include "..\Headers\CompileShaders.h"
 #include "..\Headers\Histogram.h"
 
@@ -44,6 +44,11 @@ void renderProbeHistogram(int numberOfSubdivisions) {
 
 	glfwSetFramebufferSizeCallback(localHistogramWindow, probe_histogram_framebuffer_size_callback);
 
+	GLuint sobelGaussFilterProgram = CompileComputeShader("../Shaders/sobelGaussFilter.comp");
+	GLuint sobelGaussFilterID;
+	sobelGaussFilter(sobelGaussFilterProgram, xResolution, yResolution, numberOfFiles, &sobelGaussFilterID);
+
+
 	GLuint HistogramProgram = CompileComputeShader("../Shaders/localHistogram.comp");
 	GLuint HistogramDrawProgram = CompileShaders("../Shaders/globalHistogram.vs", "../Shaders/globalHistogram.fs");
 
@@ -73,6 +78,7 @@ void renderProbeHistogram(int numberOfSubdivisions) {
 		glfwSwapBuffers(localHistogramWindow);
 	}
 	glDeleteProgram(HistogramProgram);
+	glDeleteProgram(sobelGaussFilterProgram);
 	local.CleanUp();
 	glDeleteProgram(HistogramDrawProgram);
 	probeHistoClosed = true;

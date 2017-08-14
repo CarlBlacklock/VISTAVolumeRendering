@@ -13,13 +13,12 @@ extern unsigned char *volumeData;
 extern int xResolution;
 extern int yResolution;
 extern int numberOfFiles;
-extern std::mutex statusMutex;
-extern int status;
+extern int numberOfSubdivisions;
 
 void histogram_framebuffer_size_callback(GLFWwindow *histogramWindow, int width, int height) {
 	glViewport(0, 0, width, height);
 }
-void renderGlobalHistogram(int numberOfSubdivisions) {
+void renderGlobalHistogram() {
 	int i;
 	GLFWwindow* globalHistogramWindow;
 	globalHistogramWindow = CreateWindow(500, 200, "Global Histogram", nullptr, nullptr);
@@ -54,10 +53,6 @@ void renderGlobalHistogram(int numberOfSubdivisions) {
 	//GLuint TestProgram = CompileShaders("../Shaders/test.vs", "../Shaders/global/Histogram.fs");
 
 	glm::mat4 OrthoMatrix = glm::ortho(0.0f, 1.0f, 0.0f, 1.0f);
-
-	statusMutex.lock();
-	status++;
-	statusMutex.unlock();
 
 
 	while (!(glfwWindowShouldClose(globalHistogramWindow) || globalHistoShouldClose)) {

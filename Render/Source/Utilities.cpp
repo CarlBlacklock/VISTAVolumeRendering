@@ -65,6 +65,33 @@ void sobelGaussFilter(GLuint sobelGaussFilterProgram, int xResolution, int yReso
 	std::cout << "Sobel Gauss Filter Applied" << std::endl;
 }
 
+/*
+float* readColorMap(const char *fileName) {
+	
+	//Open mat file
+	MATFile *pmat = matOpen(fileName, "r");
+	if (pmat == NULL) 
+		return nullptr;
+
+	//read in color map
+	mxArray *arr = matGetVariable(pmat, "a");
+	float *colorMap;
+	if (arr != NULL && mxIsDouble(arr) && !mxIsEmpty(arr)) {
+		// copy data
+		colorMap = (float *)malloc(mxGetNumberOfElements(arr) * sizeof(float));
+		int elements = (int)mxGetNumberOfElements(arr);
+		double * arrPointer = mxGetPr(arr);
+		for (int i = 0; i < elements; i++) {
+			colorMap[i] = (float)arrPointer[i];
+		}
+
+		mxDestroyArray(arr);
+		matClose(pmat);
+		return colorMap;
+	}
+	return nullptr;
+}
+*/
 
 const GLint triTable[256][16] =
 { { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
