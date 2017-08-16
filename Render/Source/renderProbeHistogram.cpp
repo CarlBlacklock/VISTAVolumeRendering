@@ -54,7 +54,7 @@ void renderProbeHistogram(int numberOfSubdivisions) {
 
 	probeFocusLock.lock();
 	probeFocus = glm::vec3(0.5f, 0.5f, 0.5f);
-	Histogram local = Histogram(probeFocus, numberOfSubdivisions, volumeData, xResolution, yResolution, numberOfFiles, HistogramProgram);
+	Histogram local = Histogram(probeFocus, numberOfSubdivisions, volumeData, xResolution, yResolution, numberOfFiles);
 	probeFocusLock.unlock();
 
 	glm::mat4 OrthoMatrix = glm::ortho(0.0f, 1.0f, 0.0f, 1.0f);
@@ -64,7 +64,7 @@ void renderProbeHistogram(int numberOfSubdivisions) {
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		if (probeFocusChanged) {
 			probeFocusLock.lock();
-			local.ChangeFocus(probeFocus, HistogramProgram, volumeData);
+			local.ChangeFocus(probeFocus, volumeData);
 			probeFocusLock.unlock();
 			probeFocusChanged = false;
 		}

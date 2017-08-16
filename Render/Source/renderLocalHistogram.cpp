@@ -50,7 +50,7 @@ void renderLocalHistogram() {
 
 	focusLock.lock();
 	focus = glm::vec3(0.5f, 0.5f, 0.5f);
-	Histogram local = Histogram(focus, numberOfSubdivisions, volumeData, xResolution, yResolution, numberOfFiles, HistogramProgram);
+	Histogram local = Histogram(focus, numberOfSubdivisions, volumeData, xResolution, yResolution, numberOfFiles);
 	focusLock.unlock();
 
 	glm::mat4 OrthoMatrix = glm::ortho(0.0f, 1.0f, 0.0f, 1.0f);
@@ -60,7 +60,7 @@ void renderLocalHistogram() {
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		if (focusChanged) {
 			focusLock.lock();
-			local.ChangeFocus(focus, HistogramProgram, volumeData);
+			local.ChangeFocus(focus, volumeData);
 			focusLock.unlock();
 			focusChanged = false;
 		}

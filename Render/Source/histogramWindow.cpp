@@ -14,6 +14,17 @@ histogramWindow::histogramWindow(int numberOfSubdivisions, unsigned char* volume
 	internalThread = std::thread(&histogramWindow::run, this, title);
 }
 
+histogramWindow::histogramWindow(int numberOfSubdivisions, int xResolution, int yResolution, int numberOfFiles, const char* title, unsigned char* volumeData) {
+	closed = false;
+	shouldClose = false;
+	xRes = xResolution;
+	yRes = yResolution;
+	zRes = numberOfFiles;
+	numOfSubdivisions = numberOfSubdivisions;
+	dataLocation = volumeData;
+	internalThread = std::thread(&histogramWindow::run, this, title);
+}
+
 void histogramWindow::forceClose() {
 	shouldClose = true;
 }
@@ -24,7 +35,7 @@ bool histogramWindow::closedStatus() {
 void histogramWindow::updateSubdivisions(int newSubdivisions) {
 	numOfSubdivisions = newSubdivisions;
 	myHistogram.CleanUp();
-	myHistogram = Histogram(numOfSubdivisions, dataLocation, xRes, yRes, zRes);
+	myHistogram = filteredHistogram(numOfSubdivisions, xRes, yRes, zRes, histogramCalculationProgram, dataLocation);
 }
 
 void histogramWindow::framebufferCallback(GLFWwindow *histogramWindow, int width, int height) {
@@ -43,7 +54,9 @@ void histogramWindow::run(const char* title) {
 
 	glViewport(0, 0, screenWidth, screenHeight);
 
-	myHistogram = Histogram(numOfSubdivisions, dataLocation, xRes, yRes, zRes);
+	histogramCalculationProgram = CompileComputeShader("../Shaders/probeHistogram.comp");
+
+	myHistogram = filteredHistogram(numOfSubdivisions, xRes, yRes, zRes, histogramCalculationProgram, dataLocation);
 
 	GLuint HistogramProgram = CompileShaders("../Shaders/globalHistogram.vs", "../Shaders/globalHistogram.fs");
 	glm::mat4 OrthoMatrix = glm::ortho(0.0f, 1.0f, 0.0f, 1.0f);

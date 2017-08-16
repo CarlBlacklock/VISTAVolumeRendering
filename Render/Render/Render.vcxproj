@@ -140,6 +140,7 @@
     <ClCompile Include="..\Source\histogramWindow.cpp" />
     <ClCompile Include="..\Source\LoadDicom.cpp" />
     <ClCompile Include="..\Source\main.cpp" />
+    <ClCompile Include="..\Source\probeFilteredHistogram.cpp" />
     <ClCompile Include="..\Source\RAWLoader.cpp" />
     <ClCompile Include="..\Source\renderGlobalHistogram.cpp" />
     <ClCompile Include="..\Source\renderLocalHistogram.cpp" />
@@ -157,6 +158,7 @@
     <ClInclude Include="..\Headers\histogramWindow.h" />
     <ClInclude Include="..\Headers\LoadDicom.h" />
     <ClInclude Include="..\Headers\localProbeWindow.h" />
+    <ClInclude Include="..\Headers\probeFilteredHistogram.h" />
     <ClInclude Include="..\Headers\RAWLoader.h" />
     <ClInclude Include="..\Headers\Render.h" />
     <ClInclude Include="..\Headers\OpenGLincludes.h" />
@@ -167,8 +169,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Shaders\basicCompute.comp" />
+    <None Include="..\Shaders\GlobalHistogram.comp" />
     <None Include="..\Shaders\globalHistogram.fs" />
     <None Include="..\Shaders\globalHistogram.vs" />
+    <None Include="..\Shaders\GlobalHistogramScaling.comp" />
     <None Include="..\Shaders\localHistogram.comp" />
     <None Include="..\Shaders\marchingCubes.comp" />
     <None Include="..\Shaders\marchingCubesOffsetCalculations.comp" />

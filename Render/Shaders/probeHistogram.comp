@@ -9,9 +9,12 @@ layout(r32i, binding = 3) uniform coherent iimage1D counts;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
 void main(void){
-	float value = texelFetch(TextureSampler, ivec3(gl_LocalInvocationID), 0);
+	float sobelValue = texelFetch(TextureSampler, ivec3(gl_GlobalInvocationID), 0).r;
+	float gaussValue = texelFetch(TextureSampler, ivec3(gl_GlobalInvocationID), 0).g;
 	float bucketBounds = 1.0f/float(numberOfSubdivisions);
-	int bucket = int(value/bucketBounds);
+	float totalValue = 0.5f * float(sobelValue) + 0.5f * float(gaussValue);
+	float floatingBucket = totalValue / bucketBounds;
+	int bucket = int(floatingBucket);
 	if(bucket == numberOfSubdivisions){
 		bucket--;
 	}

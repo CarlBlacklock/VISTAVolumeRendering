@@ -23,6 +23,8 @@ extern bool GLEWINIT;
 extern bool localHistoShouldClose;
 extern bool probeHistoShouldClose;
 
+extern GLuint sobelGaussFilterID;
+
 
 
 int main() {
@@ -49,10 +51,10 @@ int main() {
 	}
 	
 	//std::thread globalHistoRender(renderGlobalHistogram);
-	histogramWindow globalHistogramWindow(numberOfSubdivisions, volumeData, xResolution, yResolution, numberOfFiles, "Global Histogram");
-	localProbeWindow probeWindow(numberOfSubdivisions, volumeData, xResolution, yResolution, numberOfFiles, "Probe Histogram", glm::vec3(0.0f, 0.0f, 0.0f));
+	histogramWindow globalHistogramWindow(numberOfSubdivisions, xResolution, yResolution, numberOfFiles, "Global Histogram", volumeData);
+	//localProbeWindow probeWindow(numberOfSubdivisions, volumeData, xResolution, yResolution, numberOfFiles, "Probe Histogram", glm::vec3(0.0f, 0.0f, 0.0f));
 	//std::thread localHistoRender(renderLocalHistogram);
-	std::thread probeHistorRender(renderProbeHistogram, numberOfSubdivisions);
+	//std::thread probeHistorRender(renderProbeHistogram, numberOfSubdivisions);
 	
 	if (globalHistoClosed) {
 		//One of the threads terminated
@@ -88,18 +90,18 @@ int main() {
 		localHistoShouldClose = true;
 		probeHistoShouldClose = true;
 		globalHistogramWindow.forceClose();
-		probeWindow.forceClose();
+		//probeWindow.forceClose();
 	}
 	std::cout << "About to close" << std::endl;
 	//std::cin >> i;
 	//marchCubes(0.2f, &numberOfVerticesCalculated, &placeholderVAO, xResolution, yResolution, numberOfFiles);
 	
 	globalHistogramWindow.~histogramWindow();
-	probeWindow.~localProbeWindow();
+	//probeWindow.~localProbeWindow();
 	//globalHistoRender.join();
 	volumeRender.join();
 	//localHistoRender.join();
-	probeHistorRender.join();
+	//probeHistorRender.join();
 	glfwTerminate();
 	free(volumeData);
 	std::cout << "Volume Data released" << std::endl;

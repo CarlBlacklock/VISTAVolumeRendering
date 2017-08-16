@@ -45,6 +45,7 @@ int xMinState, xMaxState, yMinState, yMaxState, zMinState, zMaxState;
 int renderMode = 0;
 int filterMode = 0;
 Camera* myCamera;
+GLuint sobelGaussFilterID;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -348,7 +349,7 @@ void renderVolume() {
 
 		return;
 	}
-	GLEWINIT = true;
+	
 	glViewport(0, 0, screenWidth, screenHeight);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetKeyCallback(window, key_callback);
@@ -413,13 +414,13 @@ void renderVolume() {
 	GLuint gradientID;
 	calculateGradients(ComputeShaderProgram, xResolution, yResolution, numberOfFiles, &gradientID);
 
-	GLuint sobelGaussFilterID;
+	
 	sobelGaussFilter(sobelGaussFilterProgram, xResolution, yResolution, numberOfFiles, &sobelGaussFilterID);
 
 	viewingDir = glm::vec3(0.0, 0.0, 0.0) - myCamera->LookFrom;
 	viewingDir = glm::normalize(viewingDir);
 	glm::vec3 Resolution = glm::vec3((float)xResolution, (float)yResolution, (float)numberOfFiles);
-
+	GLEWINIT = true;
 	//Initialize extents
 	extents = (float *)malloc(6 * sizeof(float));
 	extents[0] = 0.0f;
@@ -472,8 +473,8 @@ void renderVolume() {
 	int numberOfFrames = 0;
 	char title[512];
 	double currentTime = glfwGetTime();
-	float alpha = 0.0f;
-	float beta = 1.0f;
+	float alpha = 0.50f;
+	float beta = 0.50f;
 	while (!(glfwWindowShouldClose(window) || volumeRenderShouldClose)) {
 
 

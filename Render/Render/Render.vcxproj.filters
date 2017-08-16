@@ -69,6 +69,9 @@
     <ClCompile Include="..\Source\VolumeRenderWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\probeFilteredHistogram.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Headers\OpenGLincludes.h">
@@ -113,6 +116,9 @@
     <ClInclude Include="..\Headers\VolumeRenderWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\Headers\probeFilteredHistogram.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Shaders\OrthoRayCastingFragment.fs" />
@@ -136,6 +142,8 @@
     <None Include="..\Shaders\localHistogram.comp" />
     <None Include="..\Shaders\sobelGaussFilter.comp" />
     <None Include="..\Shaders\probeHistogram.comp" />
+    <None Include="..\Shaders\GlobalHistogram.comp" />
+    <None Include="..\Shaders\GlobalHistogramScaling.comp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\Resources\triTable.txt" />
