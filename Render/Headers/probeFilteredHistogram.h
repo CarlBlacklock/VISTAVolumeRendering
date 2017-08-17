@@ -12,17 +12,19 @@ private:
 	GLuint scaledCountsTexture;
 	GLuint filteredVolume;
 	GLuint myProgram;
+	GLuint scalingProgram;
 	int totalSubdivisions;
 	int xRes, yRes, numFiles;
-	glm::vec3 myFocus;
+	glm::ivec3 myFocus;
 	unsigned char* dataLocation;
 	void calculateHistogram(GLuint histoProgram);
+	void recalculateHistogram(GLuint histoProgram);
 public:
 	probeFilteredHistogram();
-	probeFilteredHistogram(int numberOfSubdivisions, int xResolution, int yResolution, int numberOfFiles, GLuint histoProgram, unsigned char* volumeData, glm::vec3 focus);
+	probeFilteredHistogram(int numberOfSubdivisions, int xResolution, int yResolution, int numberOfFiles, GLuint histoProgram, unsigned char* volumeData, glm::ivec3 focus);
 	void DrawHistogram(GLuint program, glm::mat4 ProjectionMatrix);
 	void CleanUp();
-	void ChangeFocus(glm::vec3 newFocus);
+	void ChangeFocus(glm::ivec3 newFocus);
 	~probeFilteredHistogram();
 };
 

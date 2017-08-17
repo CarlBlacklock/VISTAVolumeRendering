@@ -33,6 +33,7 @@ typedef struct Light {
 	glm::vec3 intensity;
 }Light;
 
+
 GLuint CompileShaders(const char *vertexShaderSource, const char *fragmentShaderSource);
 
 GLuint CompileComputeShader(const char *computeShaderSource);

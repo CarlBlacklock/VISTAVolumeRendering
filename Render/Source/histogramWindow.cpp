@@ -41,7 +41,9 @@ void histogramWindow::updateSubdivisions(int newSubdivisions) {
 void histogramWindow::framebufferCallback(GLFWwindow *histogramWindow, int width, int height) {
 	glViewport(0, 0, width, height);
 }
-
+void histogramFrameBufferCallbackFunc(GLFWwindow *w, int x, int y) {
+	static_cast<histogramWindow*>(glfwGetWindowUserPointer(w))->framebufferCallback(w, x, y);
+}
 void histogramWindow::run(const char* title) {
 	glfwWindow = CreateWindow(500, 200, title, nullptr, nullptr);
 	if (nullptr == glfwWindow) {
@@ -51,10 +53,11 @@ void histogramWindow::run(const char* title) {
 	}
 	glfwGetFramebufferSize(glfwWindow, &screenWidth, &screenHeight);
 	glfwMakeContextCurrent(glfwWindow);
-
+	glfwSetWindowUserPointer(glfwWindow, this);
+	glfwSetFramebufferSizeCallback(glfwWindow, histogramFrameBufferCallbackFunc);
 	glViewport(0, 0, screenWidth, screenHeight);
 
-	histogramCalculationProgram = CompileComputeShader("../Shaders/probeHistogram.comp");
+	histogramCalculationProgram = CompileComputeShader("../Shaders/globalHistogram.comp");
 
 	myHistogram = filteredHistogram(numOfSubdivisions, xRes, yRes, zRes, histogramCalculationProgram, dataLocation);
 

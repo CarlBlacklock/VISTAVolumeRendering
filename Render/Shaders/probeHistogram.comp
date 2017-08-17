@@ -9,8 +9,9 @@ layout(r32i, binding = 3) uniform coherent iimage1D counts;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
 void main(void){
-	float sobelValue = texelFetch(TextureSampler, ivec3(gl_GlobalInvocationID), 0).r;
-	float gaussValue = texelFetch(TextureSampler, ivec3(gl_GlobalInvocationID), 0).g;
+	ivec3 offset = ivec3(gl_GlobalInvocationID.x - 3, gl_GlobalInvocationID.y - 3, gl_GlobalInvocationID.z - 3);
+	float sobelValue = texelFetch(TextureSampler, ivec3(focus.x - offset.x, focus.y - offset.y, focus.z - offset.z), 0).r;
+	float gaussValue = texelFetch(TextureSampler, ivec3(focus.x - offset.x, focus.y - offset.y, focus.z - offset.z), 0).g;
 	float bucketBounds = 1.0f/float(numberOfSubdivisions);
 	float totalValue = 0.5f * float(sobelValue) + 0.5f * float(gaussValue);
 	float floatingBucket = totalValue / bucketBounds;

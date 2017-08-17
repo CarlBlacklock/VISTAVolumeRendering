@@ -11,7 +11,7 @@ public:
 	void forceClose();
 	void updateSubdivisions(int newSubdivisions);
 	~histogramWindow();
-
+	void framebufferCallback(GLFWwindow *histogramWindow, int width, int height);
 private:
 	filteredHistogram myHistogram;
 	GLuint volume;
@@ -20,7 +20,7 @@ private:
 	bool shouldClose;
 	GLFWwindow* glfwWindow;
 	int screenWidth, screenHeight;
-	void framebufferCallback(GLFWwindow *histogramWindow, int width, int height);
+	
 	int xRes, yRes, zRes;
 	int numOfSubdivisions;
 	unsigned char *dataLocation;

@@ -2,7 +2,7 @@
 
 
 
-localProbeWindow::localProbeWindow(int numberOfSubdivisions, unsigned char* volumeData, int xResolution, int yResolution, int numberOfFiles, const char* title, glm::vec3 initialFocus){
+localProbeWindow::localProbeWindow(int numberOfSubdivisions, unsigned char* volumeData, int xResolution, int yResolution, int numberOfFiles, const char* title, glm::ivec3 initialFocus){
 	closed = false;
 	shouldClose = false;
 	xRes = xResolution;
@@ -31,14 +31,18 @@ bool localProbeWindow::closedStatus() {
 void localProbeWindow::updateSubdivisions(int newSubdivisions) {
 	numOfSubdivisions = newSubdivisions;
 	myHistogram.CleanUp();
-	myHistogram = Histogram(focus, numOfSubdivisions, dataLocation, xRes, yRes, zRes);
+	myHistogram = probeFilteredHistogram(numOfSubdivisions, xRes, yRes, zRes, HistogramCalculationProgram, dataLocation, focus);
 }
 
-void localProbeWindow::changeFocus(glm::vec3 newFocus){
+void localProbeWindow::changeFocus(glm::ivec3 newFocus){
 	focus = newFocus;
-	myHistogram.ChangeFocus(focus, dataLocation);
+	focusChanged = true;
+	//myHistogram.ChangeFocus(focus);
 }
 
+void probeWindowFramebufferCallbackFunc(GLFWwindow *w, int x, int y) {
+	static_cast<localProbeWindow*>(glfwGetWindowUserPointer(w))->framebufferCallback(w, x, y);
+}
 void localProbeWindow::run(const char * title) {
 	glfwWindow = CreateWindow(500, 200, title, nullptr, nullptr);
 	if (nullptr == glfwWindow) {
@@ -48,16 +52,22 @@ void localProbeWindow::run(const char * title) {
 	}
 	glfwGetFramebufferSize(glfwWindow, &screenWidth, &screenHeight);
 	glfwMakeContextCurrent(glfwWindow);
-
+	glfwSetWindowUserPointer(glfwWindow, this);
+	glfwSetFramebufferSizeCallback(glfwWindow, probeWindowFramebufferCallbackFunc);
 	glViewport(0, 0, screenWidth, screenHeight);
 	
-	myHistogram = Histogram(focus, numOfSubdivisions, dataLocation, xRes, yRes, zRes);
-
+	
+	HistogramCalculationProgram = CompileComputeShader("../Shaders/probeHistogram.comp");
 	GLuint HistogramProgram = CompileShaders("../Shaders/globalHistogram.vs", "../Shaders/globalHistogram.fs");
+	myHistogram = probeFilteredHistogram(numOfSubdivisions, xRes, yRes, zRes, HistogramCalculationProgram, dataLocation, focus);
 	glm::mat4 OrthoMatrix = glm::ortho(0.0f, 1.0f, 0.0f, 1.0f);
 
 	while (!(glfwWindowShouldClose(glfwWindow) || shouldClose)) {
 		glfwPollEvents();
+		if (focusChanged) {
+			myHistogram.ChangeFocus(focus);
+			focusChanged = false;
+		}
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		myHistogram.DrawHistogram(HistogramProgram, OrthoMatrix);

@@ -170,7 +170,7 @@ void DataCube::DrawDataCube(GLuint program, GLuint volumeData) {
 
 }
 
-void DataCube::DrawDataCubeOrthoView(GLuint program, GLuint volumeData, glm::mat4 OrthoMatrix, glm::mat4 ViewMatrix, glm::vec3 ViewingDir, glm::vec3 Resolution, glm::vec2 mousePosition, float *extents, float alpha, float beta, int filterMode){
+void DataCube::DrawDataCubeOrthoView(GLuint program, GLuint volumeData, glm::mat4 OrthoMatrix, glm::mat4 ViewMatrix, glm::vec3 ViewingDir, glm::vec3 Resolution, float *extents, float alpha, float beta, int filterMode){
 	GLint textureLocation, orthoLocation, viewLocation, viewingDirLocation, resolutionLocation, gradientLocation, lightLocation, modelLocation, extentLocation;
 	GLint mousePosLocation, alphaLocation, betaLocation;
 	GLuint filterUniform;
@@ -206,10 +206,10 @@ void DataCube::DrawDataCubeOrthoView(GLuint program, GLuint volumeData, glm::mat
 
 	extentLocation = glGetUniformLocation(program, "zMaxExtent");
 	glUniform1f(extentLocation, extents[5]);
-
+	/*
 	mousePosLocation = glGetUniformLocation(program, "mousePosition");
 	glUniform2fv(mousePosLocation, 1, glm::value_ptr(mousePosition));
-
+	*/
 	alphaLocation = glGetUniformLocation(program, "alpha");
 	glUniform1f(alphaLocation, alpha);
 

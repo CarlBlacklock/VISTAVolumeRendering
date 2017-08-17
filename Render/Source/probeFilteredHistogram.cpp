@@ -66,7 +66,7 @@ void probeFilteredHistogram::calculateHistogram(GLuint histoProgram){
 
 	GLint focusLocation;
 	focusLocation = glGetUniformLocation(histoProgram, "focus");
-	glUniform3fv(focusLocation, 1, glm::value_ptr(myFocus));
+	glUniform3iv(focusLocation, 1, glm::value_ptr(myFocus));
 	glDispatchCompute(7, 7, 7);
 	while ((errorType = glGetError()) != GL_NO_ERROR) {
 
@@ -76,6 +76,10 @@ void probeFilteredHistogram::calculateHistogram(GLuint histoProgram){
 	while ((errorType = glGetError()) != GL_NO_ERROR) {
 
 	}
+	glFinish();
+
+	glBindTexture(GL_TEXTURE_1D, countsTexture);
+	glGetTexImage(GL_TEXTURE_1D, 0, GL_RED_INTEGER, GL_INT, initialCounts);
 	glFinish();
 
 	GLfloat* initialScaling = (GLfloat *)malloc(totalSubdivisions * sizeof(GLfloat));
@@ -99,7 +103,7 @@ void probeFilteredHistogram::calculateHistogram(GLuint histoProgram){
 
 	glBindImageTexture(3, scaledCountsTexture, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_R32F);
 
-	GLuint scalingProgram = CompileComputeShader("../Shaders/GlobalHistogramScaling.comp");
+	scalingProgram = CompileComputeShader("../Shaders/GlobalHistogramScaling.comp");
 	glUseProgram(scalingProgram);
 
 	readLocation = glGetUniformLocation(scalingProgram, "TextureSampler");
@@ -117,9 +121,116 @@ void probeFilteredHistogram::calculateHistogram(GLuint histoProgram){
 	glBindImageTexture(3, 0, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 	glFinish();
 
+	glBindTexture(GL_TEXTURE_1D, scaledCountsTexture);
+	glGetTexImage(GL_TEXTURE_1D, 0, GL_RED, GL_FLOAT, initialScaling);
+	glFinish();
+
 	glDeleteProgram(sobelGaussFilterProgram);
-	glDeleteProgram(scalingProgram);
 	glDeleteTextures(1, &volumeID);
+	free(initialCounts);
+	free(initialScaling);
+}
+
+void probeFilteredHistogram::recalculateHistogram(GLuint histoProgram){
+	GLenum errorType;
+	int* initialCounts = (int *)malloc(totalSubdivisions * sizeof(int));
+	int i;
+	for (i = 0; i < totalSubdivisions; i++) {
+		initialCounts[i] = 0;
+	}
+
+	glActiveTexture(GL_TEXTURE9);
+	glBindTexture(GL_TEXTURE_1D, countsTexture);
+	glTexImage1D(GL_TEXTURE_1D, 0, GL_R32I, totalSubdivisions, 0, GL_RED_INTEGER, GL_INT, initialCounts);
+	while ((errorType = glGetError()) != GL_NO_ERROR) {
+
+	}
+	while ((errorType = glGetError()) != GL_NO_ERROR) {
+
+	}
+
+	glBindImageTexture(3, countsTexture, 0, GL_TRUE, 0, GL_READ_WRITE, GL_R32I);
+
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_3D, filteredVolume);
+	while ((errorType = glGetError()) != GL_NO_ERROR) {
+
+	}
+
+	glUseProgram(histoProgram);
+	while ((errorType = glGetError()) != GL_NO_ERROR) {
+
+	}
+
+	GLint readLocation, writeLocation;
+	readLocation = glGetUniformLocation(histoProgram, "TextureSampler");
+	glUniform1i(readLocation, 4);
+	while ((errorType = glGetError()) != GL_NO_ERROR) {
+
+	}
+	GLint numLocation;
+	numLocation = glGetUniformLocation(histoProgram, "numberOfSubdivisions");
+	glUniform1i(numLocation, totalSubdivisions);
+
+	GLint focusLocation;
+	focusLocation = glGetUniformLocation(histoProgram, "focus");
+	glUniform3iv(focusLocation, 1, glm::value_ptr(myFocus));
+	glDispatchCompute(7, 7, 7);
+	while ((errorType = glGetError()) != GL_NO_ERROR) {
+
+	}
+	glMemoryBarrier(GL_ALL_BARRIER_BITS);
+	glBindImageTexture(3, 0, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+	while ((errorType = glGetError()) != GL_NO_ERROR) {
+
+	}
+	glFinish();
+
+	glBindTexture(GL_TEXTURE_1D, countsTexture);
+	glGetTexImage(GL_TEXTURE_1D, 0, GL_RED_INTEGER, GL_INT, initialCounts);
+	glFinish();
+
+	GLfloat* initialScaling = (GLfloat *)malloc(totalSubdivisions * sizeof(GLfloat));
+	for (i = 0; i < totalSubdivisions; i++) {
+		initialScaling[i] = 0.0f;
+	}
+	glActiveTexture(GL_TEXTURE10);
+	glBindTexture(GL_TEXTURE_1D, scaledCountsTexture);
+	glTexImage1D(GL_TEXTURE_1D, 0, GL_R32F, totalSubdivisions, 0, GL_RED, GL_FLOAT, initialScaling);
+	while ((errorType = glGetError()) != GL_NO_ERROR) {
+
+	}
+
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	while ((errorType = glGetError()) != GL_NO_ERROR) {
+
+	}
+
+	glBindImageTexture(3, scaledCountsTexture, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_R32F);
+
+	glUseProgram(scalingProgram);
+
+	readLocation = glGetUniformLocation(scalingProgram, "TextureSampler");
+	glUniform1i(readLocation, 9);
+
+	numLocation = glGetUniformLocation(scalingProgram, "numberOfSubdivisions");
+	glUniform1i(numLocation, totalSubdivisions);
+
+	glBindImageTexture(4, countsTexture, 0, GL_TRUE, 0, GL_READ_ONLY, GL_R32I);
+	while ((errorType = glGetError()) != GL_NO_ERROR) {
+
+	}
+	glDispatchCompute(totalSubdivisions, 1, 1);
+	glMemoryBarrier(GL_ALL_BARRIER_BITS);
+	glBindImageTexture(3, 0, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+	glFinish();
+
+	glBindTexture(GL_TEXTURE_1D, scaledCountsTexture);
+	glGetTexImage(GL_TEXTURE_1D, 0, GL_RED, GL_FLOAT, initialScaling);
+	glFinish();
+
 	free(initialCounts);
 	free(initialScaling);
 }
@@ -128,12 +239,15 @@ probeFilteredHistogram::probeFilteredHistogram()
 {
 }
 
-probeFilteredHistogram::probeFilteredHistogram(int numberOfSubdivisions, int xResolution, int yResolution, int numberOfFiles, GLuint histoProgram, unsigned char * volumeData, glm::vec3 focus){
+probeFilteredHistogram::probeFilteredHistogram(int numberOfSubdivisions, int xResolution, int yResolution, int numberOfFiles, GLuint histoProgram, unsigned char * volumeData, glm::ivec3 focus){
 	GLenum errorType;
 	myProgram = histoProgram;
 	myFocus = focus;
 	totalSubdivisions = numberOfSubdivisions;
 	dataLocation = volumeData;
+	xRes = xResolution;
+	yRes = yResolution;
+	numFiles = numberOfFiles;
 	float barWidth = 1.0f / (float)totalSubdivisions;
 	int i;
 	vertices = (Vertex *)malloc(6 * sizeof(Vertex));
@@ -174,7 +288,7 @@ probeFilteredHistogram::probeFilteredHistogram(int numberOfSubdivisions, int xRe
 				translatePart = glm::translate(identityMatrix, glm::vec3((float)i * barWidth, 0.0f, 0.0f));
 				modelMatrices[i] = translatePart * scalePart * identityMatrix;
 			}
-			calculateHistogram(histoProgram);
+			calculateHistogram(myProgram);
 			glGenBuffers(3, VBO);
 			glGenVertexArrays(1, &VAO);
 			glBindVertexArray(VAO);
@@ -208,7 +322,6 @@ probeFilteredHistogram::probeFilteredHistogram(int numberOfSubdivisions, int xRe
 			free(vertices);
 			//free(numberOfOccurrances);
 			
-			glDeleteTextures(1, &countsTexture);
 			
 		}
 	}
@@ -249,11 +362,14 @@ void probeFilteredHistogram::CleanUp(){
 	glDeleteBuffers(3, VBO);
 	glDeleteTextures(1, &scaledCountsTexture);
 	glDeleteTextures(1, &filteredVolume);
+	glDeleteProgram(scalingProgram);
+	glDeleteTextures(1, &countsTexture);
 }
 
-void probeFilteredHistogram::ChangeFocus(glm::vec3 newFocus){
+void probeFilteredHistogram::ChangeFocus(glm::ivec3 newFocus){
 	myFocus = newFocus;
-	calculateHistogram(myProgram);
+	//std::cout << "focus set to x: " << std::setprecision(15) << myFocus.x << " y: " << myFocus.y << " z: " << myFocus.z << std::endl;
+	recalculateHistogram(myProgram);
 }
 
 probeFilteredHistogram::~probeFilteredHistogram()

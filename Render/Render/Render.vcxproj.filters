@@ -45,18 +45,6 @@
     <ClCompile Include="..\Source\Histogram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\renderVolume.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\renderGlobalHistogram.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\renderLocalHistogram.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\renderProbeHistogram.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\histogramWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -70,6 +58,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\probeFilteredHistogram.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\GaussianWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Gaussian.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -101,9 +95,6 @@
     <ClInclude Include="..\Headers\Histogram.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Headers\renderThreads.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\Headers\histogramWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -117,6 +108,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Headers\probeFilteredHistogram.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Headers\GaussianWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Headers\Gaussian.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -139,11 +136,12 @@
     <None Include="..\Shaders\globalHistogram.fs" />
     <None Include="..\Shaders\test.vs" />
     <None Include="..\Shaders\test.fs" />
-    <None Include="..\Shaders\localHistogram.comp" />
     <None Include="..\Shaders\sobelGaussFilter.comp" />
     <None Include="..\Shaders\probeHistogram.comp" />
     <None Include="..\Shaders\GlobalHistogram.comp" />
     <None Include="..\Shaders\GlobalHistogramScaling.comp" />
+    <None Include="..\Shaders\Gaussian.vs" />
+    <None Include="..\Shaders\Gaussian.fs" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\Resources\triTable.txt" />
