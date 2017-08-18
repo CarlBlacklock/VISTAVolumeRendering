@@ -5,6 +5,25 @@
 Gaussian::Gaussian(){
 	
 }
+
+float Gaussian::getA() {
+	return a;
+}
+float Gaussian::getB() {
+	return b;
+}
+float Gaussian::getC() {
+	return c;
+}
+void Gaussian::addA(float newA) {
+	a = a + newA;
+}
+void Gaussian::addB(float newB) {
+	b = b + newB;
+}
+void Gaussian::addC(float newC) {
+	c = c + newC;
+}
 Gaussian::Gaussian(int k) {
 	int i;
 	vertices = (Vertex *)malloc(200 * sizeof(Vertex));
@@ -26,10 +45,16 @@ Gaussian::Gaussian(int k) {
 		b = 0.5f;
 		c = 0.25f;
 	}
+	free(vertices);
 }
 
 Gaussian::~Gaussian()
 {
+}
+
+void Gaussian::CleanUp(){
+	glDeleteBuffers(1, &VBO);
+	glDeleteVertexArrays(1, &VAO);
 }
 
 void Gaussian::DrawGaussian(GLuint program, glm::mat4 ProjectionMatrix){

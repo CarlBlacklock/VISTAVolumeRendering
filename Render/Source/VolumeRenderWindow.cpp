@@ -34,6 +34,10 @@ void VolumeRenderWindow::attachHistogramWindow(histogramWindow* histogramWindow)
 	attachedHistogramWindow = histogramWindow;
 }
 
+void VolumeRenderWindow::attachGaussianWindow(GaussianWindow * gaussWindow){
+	attachedGaussianWindow = gaussWindow;
+}
+
 void renderWindowFramebufferCallbackFunc(GLFWwindow *w, int x, int y) {
 	static_cast<VolumeRenderWindow*>(glfwGetWindowUserPointer(w))->framebufferCallback(w, x, y);
 }
@@ -168,14 +172,16 @@ void VolumeRenderWindow::run(const char * title){
 
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClearDepth(1.0f);
-
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		if (renderMode == 1) {
 			if (filterMode == 0) {
 				myCube->DrawDataCubeOrthoView(MovingOrthoRayCastingProgram, volumeID, OrthoMatrix, myCamera->ViewMatrix, myCamera->ViewDir, Resolution, extents, alpha, beta, filterMode);
 			}
-			else if (filterMode == 1) {
-				myCube->DrawDataCubeOrthoView(MovingOrthoRayCastingProgram, sobelGaussFilterID, OrthoMatrix, myCamera->ViewMatrix, myCamera->ViewDir, Resolution, extents, alpha, beta, filterMode);
+			else if (filterMode > 0) {
+				if (attachedGaussianWindow != nullptr) {
+					myCube->DrawDataCubeWithGaussian(MovingOrthoRayCastingProgram, sobelGaussFilterID, OrthoMatrix, myCamera->ViewMatrix, myCamera->ViewDir, Resolution, extents, alpha, beta, filterMode, attachedGaussianWindow->getA(), attachedGaussianWindow->getB(), attachedGaussianWindow->getC());
+				}
 			}
 		}
 		if (renderMode == 0) {
@@ -439,6 +445,34 @@ void VolumeRenderWindow::keyCallback(GLFWwindow* window, int key, int scancode, 
 
 		case GLFW_KEY_X:
 			filterMode = 1;
+			break;
+
+		case GLFW_KEY_M:
+			filterMode = 2;
+			break;
+
+		case GLFW_KEY_EQUAL:
+			if (attachedGaussianWindow != nullptr) {
+				attachedGaussianWindow->addC(0.005);
+			}
+			break;
+
+		case GLFW_KEY_MINUS:
+			if (attachedGaussianWindow != nullptr) {
+				attachedGaussianWindow->addC(-0.005);
+			}
+			break;
+
+		case GLFW_KEY_0:
+			if (attachedGaussianWindow != nullptr) {
+				attachedGaussianWindow->addB(0.005);
+			}
+			break;
+
+		case GLFW_KEY_9:
+			if (attachedGaussianWindow != nullptr) {
+				attachedGaussianWindow->addB(-0.005);
+			}
 			break;
 
 		case GLFW_KEY_P:

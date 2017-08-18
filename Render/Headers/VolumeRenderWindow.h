@@ -9,6 +9,7 @@
 #include "..\Headers\Utilities.h"
 #include "..\Headers\ScreenFillingQuad.h"
 #include "..\Headers\DataCube.h"
+#include "..\Headers\GaussianWindow.h"
 
 
 class VolumeRenderWindow
@@ -26,6 +27,7 @@ public:
 	void attachProbeWindow(localProbeWindow* probeWindow);
 	void attachLocalHistogramWindow(localProbeWindow* localHistogramWindow);
 	void attachHistogramWindow(histogramWindow* histogramWindow);
+	void attachGaussianWindow(GaussianWindow* gaussWindow);
 
 private:
 	bool closed;
@@ -42,6 +44,7 @@ private:
 	localProbeWindow *attachedProbeWindow;
 	localProbeWindow *attachedLocalHistogramWindow;
 	histogramWindow *attachedHistogramWindow;
+	GaussianWindow *attachedGaussianWindow;
 	DataCube* myCube;
 	Camera* myCamera;
 	GLuint volumeID, sobelGaussFilterID, colorTex, depthTex, posTex, fboHandle;

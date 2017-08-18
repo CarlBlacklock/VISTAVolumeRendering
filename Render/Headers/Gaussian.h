@@ -6,12 +6,13 @@ public:
 	Gaussian();
 	Gaussian(int k);
 	~Gaussian();
+	void CleanUp();
 	float getA();
 	float getB();
 	float getC();
-	void setA();
-	void setB();
-	void setC();
+	void addA(float newA);
+	void addB(float newB);
+	void addC(float newC);
 	void DrawGaussian(GLuint program, glm::mat4 ProjectionMatrix);
 
 private:

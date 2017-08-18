@@ -24,7 +24,9 @@ uniform float zMaxExtent;
 uniform vec2 mousePosition;
 uniform float alpha;
 uniform float beta;
-
+uniform float a;
+uniform float b;
+uniform float c;
 out vec4 color;
 
 vec3 diffuse(vec3 position, vec3 currentColor){
@@ -160,6 +162,40 @@ subroutine (filterFunction) void sobelGaussFilter(){
 		float sampleValue = alpha * filterValues.x + beta * filterValues.y;
 		if(sampleValue >= 0.1){
 			currentColor = vec4(sampleValue,sampleValue,sampleValue, sampleValue);
+			color.rgb = color.rgb + (1 - color.a) * currentColor.a * currentColor.rgb;
+			color.a   = color.a   + (1 - color.a) * currentColor.a;
+		}
+		
+		//if(color.a == 1.0 || currentPos.x < xMin || currentPos.y < yMin || currentPos.z < zMin || currentPos.x > xMax || currentPos.y > yMax || currentPos.z > zMax){
+			//break;
+		//}
+		currentPos += step;
+	}
+	
+}
+
+subroutine (filterFunction) void sobelGaussWithAlphaChannel(){
+	vec3 stepSizes = 1.0f / Resolution;
+	vec3 viewDir = normalize(ViewingDir);
+	vec3 step = vec3(viewDir.x * stepSizes.x, viewDir.y * stepSizes.y, viewDir.z * stepSizes.z);
+	float xMin = xMinExtent/Resolution.x;
+	float xMax = xMaxExtent/Resolution.x;
+	float yMin = yMinExtent/Resolution.y;
+	float yMax = yMaxExtent/Resolution.y;
+	float zMin = zMinExtent/Resolution.z;
+	float zMax = zMaxExtent/Resolution.z;
+	vec3 currentPos = textureCoords;
+	vec4 currentColor = vec4(0.0, 0.0, 0.0, 0.0);
+	color = vec4(0.0, 0.0, 0.0, 0.0);
+	while(!(currentPos.x < xMin || currentPos.y < yMin || currentPos.z < zMin || currentPos.x > xMax || currentPos.y > yMax || currentPos.z > zMax || color.a >= 1.0f)){
+		vec2 filterValues = texture(TextureSampler, currentPos).rg;
+		//Solve the filter equation: alpha * f(x,y,z) + beta * g(x,y,z)
+		float sampleValue = alpha * filterValues.x + beta * filterValues.y;
+		if(sampleValue >= 0.1){
+			float numer = pow(sampleValue - b, 2.0f);
+			float demon = 2.0 * pow(c, 2.0f);
+			float alphaValue = a * exp(-(numer/demon));
+			currentColor = vec4(sampleValue,sampleValue,sampleValue, alphaValue);
 			color.rgb = color.rgb + (1 - color.a) * currentColor.a * currentColor.rgb;
 			color.a   = color.a   + (1 - color.a) * currentColor.a;
 		}

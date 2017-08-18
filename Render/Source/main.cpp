@@ -54,6 +54,7 @@ int main() {
 	renderWindow.attachHistogramWindow(&globalHistogramWindow);
 	renderWindow.attachProbeWindow(&probeWindow);
 	renderWindow.attachLocalHistogramWindow(&localHistogramWindow);
+	renderWindow.attachGaussianWindow(&gaussWindow);
 	
 	
 	while (!(renderWindow.closedStatus() || probeWindow.closedStatus() || localHistogramWindow.closedStatus() || globalHistogramWindow.closedStatus())){
@@ -66,23 +67,27 @@ int main() {
 		probeWindow.forceClose();
 		localHistogramWindow.forceClose();
 		globalHistogramWindow.forceClose();
+		gaussWindow.forceClose();
 	}
 	
 	else if (probeWindow.closedStatus()) {
 		renderWindow.forceClose();
 		localHistogramWindow.forceClose();
 		globalHistogramWindow.forceClose();
+		gaussWindow.forceClose();
 	}
 	
 	else if (localHistogramWindow.closedStatus()) {
 		renderWindow.forceClose();
 		globalHistogramWindow.forceClose();
 		probeWindow.forceClose();
+		gaussWindow.forceClose();
 	}
 	else if (globalHistogramWindow.closedStatus()) {
 		renderWindow.forceClose();
 		localHistogramWindow.forceClose();
 		probeWindow.forceClose();
+		gaussWindow.forceClose();
 	}
 	std::cout << "About to close" << std::endl;
 	//std::cin >> i;
